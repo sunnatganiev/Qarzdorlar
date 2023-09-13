@@ -6,141 +6,35 @@ import {
   StyleSheet,
   ActivityIndicator,
   ScrollView,
-  TextInput,
-  Alert,
-  Image
+  TextInput
 } from 'react-native'
-import uuid from 'react-native-uuid'
-import React, { useState, useEffect } from 'react'
+
+import React, { useState } from 'react'
 import { LinearGradient } from 'expo-linear-gradient'
 import { SafeAreaView } from 'react-native-safe-area-context'
 import { useNavigation } from '@react-navigation/native'
 import { Entypo } from '@expo/vector-icons'
 import NumberInput from '../components/NumberInput'
 import { sendAuthenticatedRequest } from '../helpers/sendRequest'
-import Product from '../components/Product'
 import { PhoneInput } from 'react-native-international-phone-number'
-import { CheckBox } from 'react-native-elements'
 import KeyboardViewWrapper from '../components/KeyboardViewWrapper'
-import { FontAwesome } from '@expo/vector-icons'
 import useTakePicture from '../hooks/useTakePicture'
 import ImagePreview from '../components/ImagePreview'
-
-const initialProduct = {
-  name: '',
-  price: '',
-  quantity: 0.0,
-  totalPrice: ''
-}
+import AddBorrow from '../components/AddBorrow'
 
 const TransactionScreen = ({ route }) => {
   const { user, type } = route.params
   const [modalVisible, setModalVisible] = useState(false)
-  const [totalPriceOfProduct, setTotalPriceOfProduct] = useState('')
-  const [qoldiq, setQoldiq] = useState('')
-  const [fee, setFee] = useState(0)
   const [isLoading, setIsLoading] = useState(false)
   const [name, setName] = useState(user.name || '')
   const [phone, setPhone] = useState(user.phoneNumber || '')
   const [address, setAddress] = useState(user.address || '')
-  const [paymentAmount, setPaymentAmount] = useState('')
-  const [products, setProducts] = useState([])
+  const [paymentAmount, setPaymentAmount] = useState(0)
+
   const navigation = useNavigation()
-  const { image, isImgLoading, handleTakePicture } = useTakePicture()
-
-  const [isChecked, setIsChecked] = useState(false)
-
-  const handlePicture = () => {
-    if (image) {
-      Alert.alert(
-        `Yuklangan rasm o'chiriladi`,
-        `Yangi rasm yuklash uchun eskisi o'chiriladi`,
-        [
-          {
-            text: 'Bekor qilish',
-            style: 'cancel'
-          },
-          {
-            text: 'Davom etish',
-            onPress: () => {
-              handleTakePicture()
-            },
-            style: 'default'
-          }
-        ]
-      )
-    } else {
-      handleTakePicture()
-    }
-  }
+  const { image } = useTakePicture()
 
   const handleCloseImagePreview = () => setModalVisible(false)
-
-  const handleCheckboxToggle = () => {
-    const lend = totalPriceOfProduct - paymentAmount
-    if (!isChecked) {
-      setFee(lend * 0.005)
-      setQoldiq(lend * 0.005 + lend)
-    } else {
-      setQoldiq(lend)
-    }
-    setIsChecked(!isChecked)
-  }
-
-  useEffect(() => {
-    setQoldiq(totalPriceOfProduct - paymentAmount)
-  }, [totalPriceOfProduct, paymentAmount])
-
-  const removeProductHandler = (id, total) => {
-    setTotalPriceOfProduct(totalPriceOfProduct - total)
-    const remainedProducts = products.filter((item) => id !== item.id)
-    setProducts(remainedProducts)
-  }
-
-  const handleAddProduct = () => {
-    const res = [...products, { ...initialProduct, id: uuid.v4() }]
-    setProducts(res)
-  }
-
-  const handleUpdateTransaction = async () => {
-    if (qoldiq < 0) {
-      return Alert.alert()
-    }
-    setIsLoading(true)
-
-    const transactions = [...user.transactions]
-
-    if (type === 'receive') {
-      transactions.push({ amount: +totalPriceOfProduct })
-    } else {
-      transactions.push(
-        {
-          amount: -Number(totalPriceOfProduct),
-          products,
-          imageUrl: image
-        },
-        { ...(paymentAmount && { amount: paymentAmount }) }
-      )
-    }
-
-    const body = {
-      transactions,
-      remain: -qoldiq
-    }
-
-    // console.log({ body })
-
-    const res = await sendAuthenticatedRequest(`/${user._id}`, 'PATCH', body)
-
-    if (res.status === 'success') {
-      setTotalPriceOfProduct('')
-      setPaymentAmount('')
-      setQoldiq('')
-      setProducts([])
-      setIsLoading(false)
-      navigation.navigate('BorrowerDetail', { refresh: true, id: user._id })
-    }
-  }
 
   const handleEdit = async () => {
     setIsLoading(true)
@@ -164,18 +58,37 @@ const TransactionScreen = ({ route }) => {
     }
   }
 
-  const addProduct = (product) => {
-    const updatedProducts = products.map((item) =>
-      item.id === product.id ? product : item
+  const handleUpdateTransaction = async () => {
+    setIsLoading(true)
+
+    const transactions = [...user.transactions]
+
+    if (paymentAmount > 0) {
+      transactions.push({ amount: paymentAmount })
+    }
+
+    const body = {
+      transactions,
+      remain: addBorrow.user.remain + +paymentAmount
+    }
+
+    const res = await sendAuthenticatedRequest(
+      `/${addBorrow.user._id}`,
+      'PATCH',
+      body
     )
 
-    const updatedTotalPriceOfProducts = updatedProducts.reduce(
-      (sum, item) => sum + item.totalPrice,
-      0
-    )
-    setTotalPriceOfProduct(updatedTotalPriceOfProducts)
-    setProducts(updatedProducts)
+    if (res.status === 'success') {
+      setPaymentAmount('')
+      setIsLoading(false)
+      navigation.navigate('BorrowerDetail', {
+        refresh: true,
+        id: addBorrow.user._id
+      })
+    }
   }
+
+  const addBorrow = { user, type }
 
   if (isLoading) {
     return (
@@ -234,209 +147,42 @@ const TransactionScreen = ({ route }) => {
             </View>
             {type !== 'edit' ? (
               <>
-                <View
-                  style={{
-                    padding: 20
-                  }}
-                >
-                  <Text
-                    style={{
-                      fontSize: 35,
-                      fontWeight: 'bold',
-                      textAlign: 'center'
-                    }}
-                  >
-                    {type === 'receive' ? "To'lov summasi" : 'Qarz berish'}
-                  </Text>
-
-                  {type !== 'receive' && (
+                <View style={{ paddingHorizontal: 20 }}>
+                  {type !== 'receive' ? (
+                    <AddBorrow
+                      setIsLoading={setIsLoading}
+                      setModalVisible={setModalVisible}
+                      addBorrow={addBorrow}
+                    />
+                  ) : (
                     <>
-                      {products?.length ? (
-                        <View
-                          style={{
-                            marginTop: 30,
-                            ...styles.inputView
-                          }}
-                        >
-                          <Text
-                            style={{
-                              fontSize: 25,
-                              fontWeight: 'bold',
-                              marginBottom: 20
-                            }}
-                          >
-                            Maxsulotlar
-                          </Text>
-                          {products?.map((product) => (
-                            <Product
-                              key={product.id}
-                              setTotal={setTotalPriceOfProduct}
-                              removeProduct={removeProductHandler}
-                              product={product}
-                              setProducts={addProduct}
-                            />
-                          ))}
+                      <View style={styles.float}>
+                        <Text style={styles.label}>To&apos;lov Summasi: </Text>
+                        <View style={[styles.inputView, styles.halfInput]}>
+                          <NumberInput
+                            placeholder="0"
+                            placeholderTextColor={'gray'}
+                            style={{ ...styles.input }}
+                            keyboardType="numeric"
+                            onChange={setPaymentAmount}
+                            changedValue={paymentAmount}
+                          />
                         </View>
-                      ) : null}
-
-                      <View
-                        style={{
-                          backgroundColor: '#55c57a',
-                          borderRadius: 100,
-                          paddingHorizontal: 10,
-                          paddingVertical: 5,
-                          alignSelf: 'center',
-                          marginTop: 20
-                        }}
-                      >
-                        <Pressable
-                          onPress={handleAddProduct}
-                          style={{
-                            paddingHorizontal: 10,
-                            paddingVertical: 8
-                          }}
-                        >
-                          <Text
-                            style={{
-                              color: '#fff',
-                              fontSize: 16,
-                              fontWeight: 'bold'
-                            }}
-                          >
-                            Maxsulot qo&apos;shish
-                          </Text>
-                        </Pressable>
                       </View>
 
-                      <View
-                        style={{
-                          flexDirection: 'row',
-                          alignItems: 'center',
-                          marginVertical: 30
-                        }}
-                      >
-                        <Text
-                          style={{
-                            fontSize: 20,
-                            fontWeight: 'bold',
-                            marginRight: 10
-                          }}
+                      {/* CTA BUTTON */}
+                      <View style={{ alignItems: 'center' }}>
+                        <TouchableOpacity
+                          style={styles.btn}
+                          onPress={handleUpdateTransaction}
                         >
-                          Jami summa:
-                        </Text>
-                        <View style={{ ...styles.inputView, flex: 1 }}>
-                          {products?.[0]?.totalPrice ? (
-                            <Text style={{ fontSize: 20, fontWeight: 'bold' }}>
-                              {new Intl.NumberFormat('en-US').format(
-                                totalPriceOfProduct
-                              )}
-                            </Text>
-                          ) : (
-                            <NumberInput
-                              placeholder="0"
-                              style={styles.input}
-                              keyboardType="numeric"
-                              onChange={setTotalPriceOfProduct}
-                              changedValue={totalPriceOfProduct}
-                            />
-                          )}
-                        </View>
+                          <Text style={styles.btnText}>
+                            To&apos;lovni qabul qilish
+                          </Text>
+                        </TouchableOpacity>
                       </View>
                     </>
                   )}
-
-                  {/* To'lov Summasi Input */}
-                  <View style={styles.float}>
-                    <Text style={styles.label}>To&apos;lov Summasi: </Text>
-                    <View
-                      style={{
-                        ...styles.inputView,
-                        width: '50%',
-                        marginTop: 0
-                      }}
-                    >
-                      <NumberInput
-                        placeholder="0"
-                        placeholderTextColor={'gray'}
-                        style={{ ...styles.input }}
-                        keyboardType="numeric"
-                        onChange={setPaymentAmount}
-                        changedValue={paymentAmount}
-                      />
-                    </View>
-                  </View>
-
-                  {/* Qoldid Input */}
-                  {type !== 'receive' && (
-                    <>
-                      <View style={{ ...styles.float }}>
-                        <Text style={styles.label}>Qarz: </Text>
-                        <Text style={styles.label}>
-                          {new Intl.NumberFormat('en-US').format(qoldiq)}
-                        </Text>
-                      </View>
-                      <View style={{ marginBottom: 30 }}>
-                        <CheckBox
-                          title="Dastur haqqini qo'shish"
-                          checked={isChecked}
-                          onPress={handleCheckboxToggle}
-                        />
-                      </View>
-                      {isImgLoading ? (
-                        <View style={styles.inputView}>
-                          <Text style={styles.label}>Rasm yuklanmoqda...</Text>
-                        </View>
-                      ) : (
-                        image && (
-                          <View style={styles.inputView}>
-                            <Pressable
-                              onPress={() => setModalVisible(true)}
-                              style={styles.image}
-                            >
-                              <Image
-                                source={{ uri: image }}
-                                style={{ flex: 1 }}
-                                onError={(error) =>
-                                  console.error('Image loading error:', error)
-                                }
-                              />
-                            </Pressable>
-                          </View>
-                        )
-                      )}
-                      <TouchableOpacity
-                        style={[styles.inputView, styles.float]}
-                        onPress={handlePicture}
-                      >
-                        <Text style={styles.label}>Rasm yuklash</Text>
-                        <FontAwesome name="camera" size={24} color="black" />
-                      </TouchableOpacity>
-                    </>
-                  )}
-                </View>
-
-                <View style={{ alignItems: 'center' }}>
-                  <Pressable
-                    style={{
-                      backgroundColor: '#55c57a',
-                      paddingHorizontal: 40,
-                      paddingVertical: 15,
-                      borderRadius: 100
-                    }}
-                    onPress={handleUpdateTransaction}
-                  >
-                    <Text
-                      style={{
-                        color: '#fff',
-                        fontWeight: 'bold',
-                        fontSize: 18
-                      }}
-                    >
-                      {type === 'receive'
-                        ? "To'lovni qabul qilish"
-                        : 'Qarz berish'}
-                    </Text>
-                  </Pressable>
                 </View>
               </>
             ) : (
@@ -463,13 +209,7 @@ const TransactionScreen = ({ route }) => {
                   }}
                   modalDisabled
                   onChangeSelectedCountry={() => {}}
-                  containerStyle={{
-                    ...styles.inputView,
-                    paddingVertical: 0,
-                    paddingHorizontal: 6,
-                    height: 50,
-                    alignItems: 'center'
-                  }}
+                  containerStyle={[styles.inputView, styles.phoneInput]}
                   inputStyle={{ paddingHorizontal: 0 }}
                 />
 
@@ -484,32 +224,15 @@ const TransactionScreen = ({ route }) => {
                 </View>
 
                 <View style={{ alignItems: 'center' }}>
-                  <Pressable
-                    style={{
-                      paddingVertical: 16,
-                      paddingHorizontal: 28,
-                      borderRadius: 100,
-                      backgroundColor: '#28b485',
-                      width: 200
-                    }}
-                    onPress={handleEdit}
-                  >
-                    <Text
-                      style={{
-                        fontSize: 18,
-                        fontWeight: 'bold',
-                        color: 'white',
-                        textAlign: 'center'
-                      }}
-                    >
-                      Saqlash
-                    </Text>
+                  <Pressable style={styles.btn} onPress={handleEdit}>
+                    <Text style={styles.btnText}>Saqlash</Text>
                   </Pressable>
                 </View>
               </View>
             )}
           </ScrollView>
         </SafeAreaView>
+
         {/* Image Preview */}
         <ImagePreview
           visible={modalVisible}
@@ -537,8 +260,28 @@ const styles = StyleSheet.create({
     shadowOpacity: 0.1,
     elevation: 3
   },
+  halfInput: {
+    width: '50%',
+    marginTop: 0
+  },
+  phoneInput: {
+    paddingVertical: 0,
+    paddingHorizontal: 6,
+    height: 50,
+    alignItems: 'center'
+  },
   input: { fontSize: 20, width: '100%' },
-
+  btn: {
+    backgroundColor: '#55c57a',
+    paddingHorizontal: 40,
+    paddingVertical: 15,
+    borderRadius: 100
+  },
+  btnText: {
+    color: '#fff',
+    fontWeight: 'bold',
+    fontSize: 18
+  },
   float: {
     flexDirection: 'row',
     alignItems: 'center',

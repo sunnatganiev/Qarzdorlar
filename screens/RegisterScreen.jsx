@@ -24,7 +24,7 @@ const RegisterScreen = () => {
   useEffect(() => {
     const checkLoginStatus = async () => {
       try {
-        await AsyncStorage.removeItem('authToken')
+        // await AsyncStorage.removeItem('authToken')
         const token = await AsyncStorage.getItem('authToken')
 
         if (token) {

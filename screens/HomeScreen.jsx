@@ -166,7 +166,7 @@ const QarzdorlarScreen = () => {
             </View>
           ) : (
             <FlatList
-              data={[...users].reverse()}
+              data={users}
               keyExtractor={(item) => item._id.toString()}
               renderItem={({ item }) => <BorrowerItem item={item} />}
               showsVerticalScrollIndicator={false}

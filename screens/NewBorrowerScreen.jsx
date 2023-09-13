@@ -4,28 +4,20 @@ import {
   TextInput,
   StyleSheet,
   ScrollView,
-  ActivityIndicator,
-  Alert
+  ActivityIndicator
 } from 'react-native'
 // import uuid from 'react-native-uuid'
-import React, { useEffect, useState } from 'react'
+import React, { useState } from 'react'
 import { SafeAreaView } from 'react-native-safe-area-context'
-import { useNavigation } from '@react-navigation/native'
+
 import { LinearGradient } from 'expo-linear-gradient'
-import { sendAuthenticatedRequest } from '../helpers/sendRequest'
+
 import { PhoneInput } from 'react-native-international-phone-number'
 import KeyboardViewWrapper from '../components/KeyboardViewWrapper'
 import ImagePreview from '../components/ImagePreview'
-import useTakePicture from '../hooks/useTakePicture'
+
 import useNotification from '../hooks/useNotification'
 import AddBorrow from '../components/AddBorrow'
-
-// const initialProduct = {
-//   name: '',
-//   price: '',
-//   quantity: 0.0,
-//   totalPrice: ''
-// }
 
 const NewBorrowerScreen = () => {
   const [modalVisible, setModalVisible] = useState(false)
@@ -33,8 +25,10 @@ const NewBorrowerScreen = () => {
   const [phone, setPhone] = useState('')
   const [address, setAddress] = useState('')
   const [isLoading, setIsLoading] = useState(false)
-
+  const { image } = useNotification()
   const handleCloseImagePreview = () => setModalVisible(false)
+
+  const newBorrower = { setName, setPhone, setAddress, name, phone, address }
 
   if (isLoading) {
     return (
@@ -80,7 +74,7 @@ const NewBorrowerScreen = () => {
             }}
             modalDisabled
             onChangeSelectedCountry={() => {}}
-            containerStyle={[styles.phoneInput, styles.inputView]}
+            containerStyle={[styles.inputView, styles.phoneInput]}
             inputStyle={{ paddingHorizontal: 0 }}
           />
 
@@ -98,12 +92,7 @@ const NewBorrowerScreen = () => {
           <AddBorrow
             setModalVisible={setModalVisible}
             setIsLoading={setIsLoading}
-            setName={setName}
-            setPhone={setPhone}
-            setAddress={setAddress}
-            name={name}
-            phone={phone}
-            address={address}
+            newBorrower={newBorrower}
           />
         </ScrollView>
 

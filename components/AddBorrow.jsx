@@ -30,17 +30,13 @@ const initialProduct = {
 const AddBorrow = ({
   setModalVisible,
   setIsLoading,
-  setAddress,
-  setName,
-  setPhone,
-  name,
-  address,
-  phone
+  newBorrower,
+  addBorrow
 }) => {
   const [products, setProducts] = useState([])
   const [qoldiq, setQoldiq] = useState(0)
-  const [paymentAmount, setPaymentAmount] = useState('')
-  const [totalPriceOfProduct, setTotalPriceOfProduct] = useState('')
+  const [paymentAmount, setPaymentAmount] = useState(0)
+  const [totalPriceOfProduct, setTotalPriceOfProduct] = useState(0)
   const { image, setImage, isImgLoading, handleTakePicture } = useTakePicture()
   const [date, setDate] = useState(new Date())
   const [isChecked, setIsChecked] = useState(false)
@@ -75,8 +71,7 @@ const AddBorrow = ({
   const handleCheckboxToggle = () => {
     const lend = totalPriceOfProduct - paymentAmount
     if (!isChecked) {
-      setFee(lend * 0.005)
-      setQoldiq(lend * 0.005 + lend)
+      setQoldiq(fee + lend)
     } else {
       setQoldiq(lend)
     }
@@ -95,14 +90,20 @@ const AddBorrow = ({
   }
 
   useEffect(() => {
-    setQoldiq(totalPriceOfProduct - paymentAmount)
+    const lend = totalPriceOfProduct - paymentAmount
+    setQoldiq(lend)
+    setFee(lend * 0.005)
   }, [totalPriceOfProduct, paymentAmount])
 
   const handleAddBorrower = async () => {
     // Validation logic
     let isValid = true
 
-    if (name.trim() === '' || !totalPriceOfProduct || phone.trim() === '') {
+    if (
+      newBorrower?.name.trim() === '' ||
+      !totalPriceOfProduct ||
+      newBorrower?.phone.trim() === ''
+    ) {
       isValid = false
     }
 
@@ -119,18 +120,27 @@ const AddBorrow = ({
       )
     }
 
-    console.log({ qoldiq })
-
     setIsLoading(true)
+
+    const transactions = [
+      {
+        amount: -totalPriceOfProduct,
+        products,
+        imageUrl: image,
+        serviceFee: fee
+      }
+    ]
+
+    if (paymentAmount > 0) {
+      transactions.push({ amount: paymentAmount })
+    }
+
     const reqBody = {
-      name,
-      address,
-      reminderDays: date,
-      phoneNumber: phone,
-      transactions: [
-        { amount: -totalPriceOfProduct, products, imageUrl: image },
-        { ...(paymentAmount && { amount: paymentAmount }) }
-      ],
+      name: newBorrower?.name,
+      address: newBorrower?.address,
+      reminder: date,
+      phoneNumber: newBorrower?.phone,
+      transactions,
       remain: -qoldiq
     }
 
@@ -138,9 +148,9 @@ const AddBorrow = ({
 
     if (res.status === 'success') {
       handleScheduleNotification(date)
-      setName('')
-      setPhone('')
-      setAddress('')
+      newBorrower?.setName('')
+      newBorrower?.setPhone('')
+      newBorrower?.setAddress('')
       setTotalPriceOfProduct('')
       setPaymentAmount('')
       setQoldiq(0)
@@ -164,6 +174,57 @@ const AddBorrow = ({
     )
     setTotalPriceOfProduct(updatedTotalPriceOfProducts)
     setProducts(updatedProducts)
+  }
+
+  const handleUpdateTransaction = async () => {
+    if (qoldiq < 0) {
+      return Alert.alert()
+    }
+    setIsLoading(true)
+
+    const transactions = [...addBorrow.user.transactions]
+
+    transactions.push({
+      amount: -Number(totalPriceOfProduct),
+      products,
+      imageUrl: image,
+      serviceFee: fee
+    })
+
+    if (paymentAmount > 0) {
+      transactions.push({ amount: paymentAmount })
+    }
+
+    const body = {
+      transactions,
+      remain: addBorrow.user.remain - qoldiq
+    }
+
+    const res = await sendAuthenticatedRequest(
+      `/${addBorrow.user._id}`,
+      'PATCH',
+      body
+    )
+
+    if (res.status === 'success') {
+      setTotalPriceOfProduct('')
+      setPaymentAmount('')
+      setQoldiq('')
+      setProducts([])
+      setIsLoading(false)
+      navigator.navigate('BorrowerDetail', {
+        refresh: true,
+        id: addBorrow.user._id
+      })
+    }
+  }
+
+  const handleAdd = () => {
+    if (addBorrow) {
+      handleUpdateTransaction()
+    } else {
+      handleAddBorrower()
+    }
   }
 
   return (
@@ -291,7 +352,7 @@ const AddBorrow = ({
 
       {/* Qarzdor saqlash Butotn */}
       <View style={styles.btnView}>
-        <Pressable onPress={handleAddBorrower}>
+        <Pressable onPress={handleAdd}>
           <Text style={styles.btnText}>Qarzdorni saqlash</Text>
         </Pressable>
       </View>

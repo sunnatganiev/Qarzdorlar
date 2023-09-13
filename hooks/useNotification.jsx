@@ -12,9 +12,9 @@ export default function useNotification() {
         (targetDate - currentTime.getTime()) / 1000
       )
 
-      //   console.log({ targetDate })
-      //   console.log('today: ', currentTime.getTime())
-      //   console.log('difference: ', targetDate - currentTime.getTime())
+      if (timeDifferenceInSeconds <= 0) {
+        return
+      }
 
       // Request notification permissions
       const { status } = await Notifications.requestPermissionsAsync()
