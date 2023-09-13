@@ -6,7 +6,8 @@ import {
   Alert,
   StyleSheet,
   Keyboard,
-  ScrollView
+  ScrollView,
+  TouchableOpacity
 } from 'react-native'
 import React, { useState, useEffect } from 'react'
 import AsyncStorage from '@react-native-async-storage/async-storage'
@@ -121,28 +122,10 @@ const LoginScreen = () => {
           />
         </View>
 
-        <View style={{ alignItems: 'center', marginTop: 30 }}>
-          <Pressable
-            style={{
-              paddingVertical: 16,
-              paddingHorizontal: 28,
-              borderRadius: 100,
-              backgroundColor: '#28b485',
-              width: 200
-            }}
-            onPress={handleLogin}
-          >
-            <Text
-              style={{
-                fontSize: 18,
-                fontWeight: 'bold',
-                color: 'white',
-                textAlign: 'center'
-              }}
-            >
-              Login
-            </Text>
-          </Pressable>
+        <View style={styles.btnWrapper}>
+          <TouchableOpacity style={styles.btnView} onPress={handleLogin}>
+            <Text style={styles.btnText}>Login</Text>
+          </TouchableOpacity>
         </View>
 
         <View
@@ -166,7 +149,7 @@ const LoginScreen = () => {
             onPress={() => navigation.navigate('Register')}
           >
             <Text style={{ color: '#fff', fontWeight: 'bold' }}>
-              Ro'yxatdan o'tish
+              Ro&apos;yxatdan o&apos;tish
             </Text>
           </Pressable>
         </View>
@@ -195,5 +178,19 @@ const styles = StyleSheet.create({
     shadowOffset: { width: 1, height: 3 },
     shadowOpacity: 0.1,
     elevation: 3
+  },
+  btnWrapper: { alignItems: 'center', marginTop: 30 },
+  btnView: {
+    paddingVertical: 16,
+    paddingHorizontal: 28,
+    borderRadius: 100,
+    backgroundColor: '#28b485',
+    width: 200
+  },
+  btnText: {
+    fontSize: 18,
+    fontWeight: 'bold',
+    color: 'white',
+    textAlign: 'center'
   }
 })

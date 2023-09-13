@@ -34,13 +34,12 @@ const BorrowerDetail = ({ route }) => {
   useFocusEffect(
     useCallback(() => {
       const fetchUser = async () => {
-        const user = await sendAuthenticatedRequest(`/${userId}`)
+        const res = await sendAuthenticatedRequest(`/${userId}`)
 
-        const newUser = user.data.oneUser
+        const newUser = res.data.oneUser
+        // console.log({ newUser })
         setUser(newUser)
-        setRemain(
-          newUser.transactions.reduce((sum, item) => sum + item.amount, 0)
-        )
+        setRemain(newUser.remain)
       }
 
       fetchUser()
@@ -51,10 +50,11 @@ const BorrowerDetail = ({ route }) => {
     const pay = async () => {
       setIsLoading(true)
       const transactions = [...user.transactions, { amount: -remain }]
-
+      const remained = transactions.reduce((sum, item) => sum + item.amount, 0)
+      console.log({ remained })
       const body = {
         transactions,
-        remain: transactions.reduce((sum, item) => sum + item.amount, 0)
+        remain: remained
       }
 
       const res = await sendAuthenticatedRequest(
@@ -163,7 +163,7 @@ const BorrowerDetail = ({ route }) => {
                 </View>
                 <View style={{ marginBottom: 20 }}>
                   <Text style={{ fontSize: 30, fontWeight: 'bold' }}>
-                    {new Intl.NumberFormat('en-US').format(remain)} SO'M
+                    {new Intl.NumberFormat('en-US').format(remain)} SO&apos;M
                   </Text>
                 </View>
                 <View
@@ -206,12 +206,12 @@ const BorrowerDetail = ({ route }) => {
                     </Text>
                   </View>
                   <View style={{ alignItems: 'center' }}>
-                    <Pressable
+                    <TouchableOpacity
                       style={{ ...styles.iconBox, backgroundColor: '#28b485' }}
                       onPress={handlePayAll}
                     >
                       <FontAwesome5 name="check" size={20} color="#fff" />
-                    </Pressable>
+                    </TouchableOpacity>
                     <Text
                       style={{ fontWeight: 'bold', fontSize: 14, marginTop: 5 }}
                     >

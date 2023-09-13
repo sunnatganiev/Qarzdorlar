@@ -11,7 +11,6 @@ import React, { useEffect, useState } from 'react'
 import { Entypo } from '@expo/vector-icons'
 import { Feather } from '@expo/vector-icons'
 import NumberInput from './NumberInput'
-import KeyboardViewWrapper from './KeyboardViewWrapper'
 
 const Product = ({ product: initialProduct, setProducts, removeProduct }) => {
   const [isExpanded, setIsExpanded] = useState(false)

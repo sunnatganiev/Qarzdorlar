@@ -7,7 +7,8 @@ import {
   Pressable,
   Alert,
   StyleSheet,
-  ScrollView
+  ScrollView,
+  TouchableOpacity
 } from 'react-native'
 import { useNavigation } from '@react-navigation/native'
 import KeyboardViewWrapper from '../components/KeyboardViewWrapper'
@@ -146,7 +147,7 @@ const RegisterScreen = () => {
         </View>
 
         <View style={{ marginTop: 40, paddingHorizontal: 20 }}>
-          <Pressable
+          <TouchableOpacity
             onPress={handleRegister}
             style={{
               paddingVertical: 16,
@@ -165,7 +166,7 @@ const RegisterScreen = () => {
             >
               Ro&apos;yxatdan o&apos;tish
             </Text>
-          </Pressable>
+          </TouchableOpacity>
         </View>
 
         <View
@@ -177,7 +178,7 @@ const RegisterScreen = () => {
           }}
         >
           <Text style={{ fontSize: 18, marginRight: 10 }}>
-            Ro'yxatdan o'tganmisiz?
+            Ro&apos;yxatdan o&apos;tganmisiz?
           </Text>
           <Pressable
             style={{
