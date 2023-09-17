@@ -26,6 +26,8 @@ const OTPScreen = ({ route }) => {
     setOTP(code)
   }
 
+  console.log(navigation)
+
   useFocusEffect(
     useCallback(() => {
       const storeToken = async (authToken) => {

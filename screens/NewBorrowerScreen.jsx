@@ -45,13 +45,14 @@ const NewBorrowerScreen = () => {
         end={[1, 1]}
         colors={['#F2F2F2', '#DBDBDB']}
       >
+        <View style={{ marginVertical: 25 }}>
+          <Text style={styles.title}>Yangi Qarzdor</Text>
+        </View>
         <ScrollView
           showsVerticalScrollIndicator={false}
           contentContainerStyle={styles.contentContainer}
           keyboardShouldPersistTaps={'handled'}
         >
-          <Text style={styles.title}>Qarzdor</Text>
-
           <View style={styles.inputView}>
             <TextInput
               placeholder="Ism"
@@ -112,7 +113,8 @@ export default NewBorrowerScreen
 const styles = StyleSheet.create({
   spinner: { flex: 1, alignItems: 'center', justifyContent: 'center' },
   contentContainer: {
-    padding: 20
+    paddingHorizontal: 20,
+    paddingBottom: 100
   },
   title: {
     textAlign: 'center',

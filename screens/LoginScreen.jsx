@@ -34,7 +34,7 @@ const LoginScreen = () => {
     }
 
     checkLoginStatus()
-  }, [])
+  }, [navigation])
 
   const handleLogin = async () => {
     try {

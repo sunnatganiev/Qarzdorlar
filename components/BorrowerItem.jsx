@@ -1,7 +1,7 @@
 import { View, Text, StyleSheet, Pressable } from 'react-native'
 import React from 'react'
-import { Entypo } from '@expo/vector-icons'
 import { useNavigation } from '@react-navigation/native'
+import { Ionicons } from '@expo/vector-icons'
 
 const BorrowerItem = ({ item }) => {
   const navigator = useNavigation()
@@ -22,8 +22,7 @@ const BorrowerItem = ({ item }) => {
         <Text style={styles.price}>
           {new Intl.NumberFormat('en-US').format(item.remain)} so&apos;m
         </Text>
-
-        <Entypo name="chevron-right" size={24} color="#28b485" />
+        <Ionicons name="chevron-forward" size={24} color="#28b485" />
       </View>
     </Pressable>
   )
