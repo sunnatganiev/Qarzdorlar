@@ -19,6 +19,8 @@ import PropTypes from 'prop-types'
 import { sendAuthenticatedRequest } from '../helpers/sendRequest'
 import useNotification from '../hooks/useNotification'
 import { useNavigation } from '@react-navigation/native'
+import { useUserContext } from '../contexts/userContext'
+import { useDebtUsers } from '../hooks/useDebtUsers'
 
 const initialProduct = {
   name: '',
@@ -38,11 +40,17 @@ const AddBorrow = ({
   const [paymentAmount, setPaymentAmount] = useState(0)
   const [totalPriceOfProduct, setTotalPriceOfProduct] = useState(0)
   const { image, setImage, isImgLoading, handleTakePicture } = useTakePicture()
-  const [date, setDate] = useState(new Date())
+  const currentDate = new Date()
+  currentDate.setDate(currentDate.getDate() + 3)
+
+  const [date, setDate] = useState(currentDate)
   const [isChecked, setIsChecked] = useState(false)
   const [fee, setFee] = useState(0)
   const { handleScheduleNotification } = useNotification()
   const navigator = useNavigation()
+  const { fetchUsers } = useUserContext()
+
+  const { LINK_TYPES } = useDebtUsers()
 
   const handlePicture = () => {
     if (image) {
@@ -91,9 +99,14 @@ const AddBorrow = ({
 
   useEffect(() => {
     const lend = totalPriceOfProduct - paymentAmount
-    setQoldiq(lend)
-    setFee(lend * 0.005)
-  }, [totalPriceOfProduct, paymentAmount])
+    const newFee = lend * 0.005
+    setFee(newFee)
+    if (isChecked) {
+      setQoldiq(newFee + lend)
+    } else {
+      setQoldiq(lend)
+    }
+  }, [totalPriceOfProduct, paymentAmount, isChecked])
 
   const handleAddBorrower = async () => {
     // Validation logic
@@ -159,7 +172,8 @@ const AddBorrow = ({
       setImage('')
       setIsLoading(false)
       setIsChecked(false)
-      navigator.navigate('HomeScreen', { refresh: true })
+      await fetchUsers(LINK_TYPES.ALL_USERS)
+      navigator.navigate('HomeScreen')
     }
   }
 
@@ -197,7 +211,8 @@ const AddBorrow = ({
 
     const body = {
       transactions,
-      remain: addBorrow.user.remain - qoldiq
+      remain: addBorrow.user.remain - qoldiq,
+      reminder: date
     }
 
     const res = await sendAuthenticatedRequest(
@@ -212,6 +227,7 @@ const AddBorrow = ({
       setQoldiq('')
       setProducts([])
       setIsLoading(false)
+      await fetchUsers(LINK_TYPES.ALL_USERS)
       navigator.navigate('BorrowerDetail', {
         refresh: true,
         id: addBorrow.user._id
@@ -254,7 +270,7 @@ const AddBorrow = ({
 
       {/* Jami Summa Input */}
       <View style={styles.float}>
-        <Text style={styles.label}>Jami Summa:</Text>
+        <Text style={styles.label}>Jami:</Text>
         <View
           style={{
             ...styles.inputView,
@@ -280,7 +296,7 @@ const AddBorrow = ({
 
       {/* To'lov Summasi Input */}
       <View style={styles.float}>
-        <Text style={styles.label}>To&apos;lov Summasi: </Text>
+        <Text style={styles.label}>To&apos;lov: </Text>
         <View
           style={{
             ...styles.inputView,
@@ -352,9 +368,9 @@ const AddBorrow = ({
 
       {/* Qarzdor saqlash Butotn */}
       <View style={styles.btnView}>
-        <Pressable onPress={handleAdd}>
+        <TouchableOpacity onPress={handleAdd}>
           <Text style={styles.btnText}>Qarzdorni saqlash</Text>
-        </Pressable>
+        </TouchableOpacity>
       </View>
     </View>
   )

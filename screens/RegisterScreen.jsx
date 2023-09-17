@@ -24,6 +24,7 @@ const RegisterScreen = () => {
   useEffect(() => {
     const checkLoginStatus = async () => {
       try {
+        console.log('Register page')
         // await AsyncStorage.removeItem('authToken')
         const token = await AsyncStorage.getItem('authToken')
 
@@ -36,7 +37,7 @@ const RegisterScreen = () => {
     }
 
     checkLoginStatus()
-  }, [])
+  }, [navigation])
 
   const handleRegister = async () => {
     if (!name || phone.length !== 11) {

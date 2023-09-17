@@ -6,13 +6,15 @@ import {
   Pressable,
   ScrollView,
   ActivityIndicator,
-  Alert
+  Alert,
+  Linking
 } from 'react-native'
-import React, { useCallback, useState } from 'react'
+import React, { useCallback, useEffect, useState } from 'react'
 import { SafeAreaView } from 'react-native-safe-area-context'
 import { FontAwesome5 } from '@expo/vector-icons'
 import { Entypo } from '@expo/vector-icons'
 import { Feather } from '@expo/vector-icons'
+
 import {
   useNavigation,
   useIsFocused,
@@ -21,23 +23,32 @@ import {
 
 import HistoryItem from '../components/HistoryItem'
 import { sendAuthenticatedRequest } from '../helpers/sendRequest'
+import { useUserContext } from '../contexts/userContext'
+import { useDebtUsers } from '../hooks/useDebtUsers'
 
 const BorrowerDetail = ({ route }) => {
   const [user, setUser] = useState(null)
   const [remain, setRemain] = useState(0)
   const [isLoading, setIsLoading] = useState(false)
+  const [daysLeft, setDaysLeft] = useState('')
+  const [badgeColor, setBadgeColor] = useState('#28b485')
   const [userId] = useState(route.params.id)
   const isFocused = useIsFocused()
+  const { fetchUsers } = useUserContext()
+  const { LINK_TYPES } = useDebtUsers()
 
   const navigator = useNavigation()
+
+  const handleCall = async (phoneNumber) => {
+    Linking.openURL(`tel:+998${phoneNumber.replaceAll(' ', '')}`)
+  }
 
   useFocusEffect(
     useCallback(() => {
       const fetchUser = async () => {
         const res = await sendAuthenticatedRequest(`/${userId}`)
-
+        console.log(res.data)
         const newUser = res.data.oneUser
-        // console.log({ newUser })
         setUser(newUser)
         setRemain(newUser.remain)
       }
@@ -46,15 +57,38 @@ const BorrowerDetail = ({ route }) => {
     }, [userId, isFocused, isLoading])
   )
 
+  const formatMovementDate = function (date) {
+    // LEC 12) add locale
+    const calcDaysPassed = (date1, date2) =>
+      Math.round((date1 - date2) / (60 * 60 * 24 * 1000))
+    const now = new Date()
+    const dayLeft = calcDaysPassed(new Date(date), now)
+
+    if (dayLeft >= 1 && dayLeft <= 3) {
+      setBadgeColor('#ff7730')
+    } else if (dayLeft <= 0) {
+      setBadgeColor('#f73d09')
+    } else {
+      setBadgeColor('#28b485')
+    }
+
+    if (dayLeft === 0) return 'Bugun'
+    if (dayLeft === 1) return 'Ertaga'
+    if (dayLeft > 1) return `${dayLeft} kun qoldi`
+    if (dayLeft < 0) return `${dayLeft} kun o'tib ketdi`
+  }
+
+  useEffect(() => {
+    setDaysLeft(formatMovementDate(user?.reminder))
+  }, [user])
+
   const handlePayAll = async () => {
     const pay = async () => {
       setIsLoading(true)
       const transactions = [...user.transactions, { amount: -remain }]
-      const remained = transactions.reduce((sum, item) => sum + item.amount, 0)
-      console.log({ remained })
       const body = {
         transactions,
-        remain: remained
+        remain: 0
       }
 
       const res = await sendAuthenticatedRequest(
@@ -64,6 +98,7 @@ const BorrowerDetail = ({ route }) => {
       )
 
       if (res.status === 'success') {
+        await fetchUsers(LINK_TYPES.ALL_USERS)
         setIsLoading(false)
       }
     }
@@ -118,7 +153,7 @@ const BorrowerDetail = ({ route }) => {
               {user.address} +998 {user.phoneNumber}
             </Text>
           </View>
-          <Pressable
+          <TouchableOpacity
             style={{
               padding: 10,
               backgroundColor: '#d0d0d0',
@@ -130,7 +165,7 @@ const BorrowerDetail = ({ route }) => {
             }
           >
             <Feather name="edit" size={20} color="black" />
-          </Pressable>
+          </TouchableOpacity>
         </View>
       </View>
       <ScrollView style={{ height: '100%', marginBottom: 300 }}>
@@ -143,22 +178,23 @@ const BorrowerDetail = ({ route }) => {
                 <View
                   style={{
                     position: 'absolute',
-                    backgroundColor: '#28b485',
+                    backgroundColor: `${badgeColor}`,
                     paddingHorizontal: 10,
                     paddingVertical: 1,
-                    width: 130,
+                    width: 'auto',
                     borderBottomRightRadius: 10
                   }}
                 >
                   <Text
                     style={{
                       fontWeight: 'bold',
-                      fontSize: 14,
+                      fontSize: 16,
                       color: '#fff',
                       textAlign: 'center'
                     }}
                   >
-                    {remain < 0 ? 'Men berdim' : 'Men Oldim'}
+                    {/* {moment(user.reminder).format('DD.MM.YY')} */}
+                    {daysLeft}
                   </Text>
                 </View>
                 <View style={{ marginBottom: 20 }}>
@@ -202,7 +238,7 @@ const BorrowerDetail = ({ route }) => {
                     <Text
                       style={{ fontWeight: 'bold', fontSize: 14, marginTop: 5 }}
                     >
-                      Qo'shish
+                      Qo&apos;shish
                     </Text>
                   </View>
                   <View style={{ alignItems: 'center' }}>
@@ -215,12 +251,24 @@ const BorrowerDetail = ({ route }) => {
                     <Text
                       style={{ fontWeight: 'bold', fontSize: 14, marginTop: 5 }}
                     >
-                      To'lash
+                      To&apos;lash
                     </Text>
                   </View>
                 </View>
               </>
             )}
+          </View>
+        )}
+
+        {user?.phoneNumber && (
+          <View>
+            <TouchableOpacity
+              style={styles.btnView}
+              onPress={() => handleCall(user.phoneNumber)}
+            >
+              <Feather name="phone-call" size={24} color="white" />
+              <Text style={styles.btnText}>Qo&apos;ng&apos;iroq qilish</Text>
+            </TouchableOpacity>
           </View>
         )}
 
@@ -240,7 +288,8 @@ const BorrowerDetail = ({ route }) => {
             style={{
               ...styles.container,
               paddingHorizontal: 15,
-              paddingVertical: 0
+              paddingVertical: 0,
+              marginBottom: 70
             }}
           >
             {[...user.transactions].reverse().map((item, index) => (
@@ -282,5 +331,15 @@ const styles = StyleSheet.create({
     borderRadius: 50,
     alignItems: 'center',
     justifyContent: 'center'
-  }
+  },
+  btnView: {
+    backgroundColor: '#55c57a',
+    borderRadius: 100,
+    alignSelf: 'center',
+    marginTop: 20,
+    paddingHorizontal: 16,
+    paddingVertical: 12,
+    flexDirection: 'row'
+  },
+  btnText: { color: '#fff', fontSize: 16, fontWeight: 'bold', marginLeft: 10 }
 })

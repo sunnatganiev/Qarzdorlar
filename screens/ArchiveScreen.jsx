@@ -1,4 +1,3 @@
-import { debounce } from 'lodash'
 import {
   View,
   Text,
@@ -7,7 +6,7 @@ import {
   TextInput,
   ActivityIndicator
 } from 'react-native'
-import React, { useRef, useMemo, useCallback, useState } from 'react'
+import React, { useRef, useMemo, useCallback } from 'react'
 import {
   BottomSheetModal,
   BottomSheetModalProvider
@@ -16,67 +15,18 @@ import {
 import { LinearGradient } from 'expo-linear-gradient'
 import BorrowerItem from '../components/BorrowerItem'
 import { EvilIcons } from '@expo/vector-icons'
-import { sendAuthenticatedRequest } from '../helpers/sendRequest'
 import KeyboardViewWrapper from '../components/KeyboardViewWrapper'
 import { useFocusEffect } from '@react-navigation/native'
+import { useDebtUsers } from '../hooks/useDebtUsers'
 
 const ArchiveScreen = () => {
-  const [isLoading, setIsLoading] = useState(false)
-  const [error, setError] = useState('')
-  const [users, setUsers] = useState([])
-
-  const fetchArchives = async () => {
-    console.log('Fetch Archives')
-    setIsLoading(true)
-    try {
-      const res = await sendAuthenticatedRequest('?remain[eq]=0')
-
-      setUsers(res.data.allDebts)
-    } catch (err) {
-      console.error('Error fetching users:', err)
-      setError('Error fetching users')
-    } finally {
-      setIsLoading(false)
-    }
-  }
-
-  const debouncedSearchFunc = debounce(async (query) => {
-    setIsLoading(true)
-
-    if (query === '') {
-      return fetchArchives()
-    }
-
-    try {
-      const res = await sendAuthenticatedRequest(
-        `/search?search=${query}&remain=0`
-      )
-
-      if (res.status === 'success') {
-        setUsers(res.data.foundedData)
-        setError('')
-      } else if (res.status === 'fail') {
-        setError(res.message)
-      }
-    } catch (err) {
-      console.error('Search err', err)
-      setError(err)
-    }
-    setIsLoading(false)
-  }, 700)
-
-  const searchFunc = (text) => {
-    debouncedSearchFunc(text)
-  }
-
-  // useEffect(() => {
-  //   fetchArchives()
-  // }, [])
+  const { users, isLoading, error, fetchUsers, searchUsers, LINK_TYPES } =
+    useDebtUsers()
 
   useFocusEffect(
     useCallback(() => {
-      fetchArchives()
-    }, [])
+      fetchUsers(LINK_TYPES.ARCHIVE)
+    }, [fetchUsers, LINK_TYPES.ARCHIVE])
   )
 
   const bottomSheetModalRef = useRef(null)
@@ -101,51 +51,32 @@ const ArchiveScreen = () => {
       >
         <BottomSheetModalProvider>
           <View style={styles.container}>
-            <Text style={{ margin: 20, fontSize: 32, fontWeight: 'bold' }}>
-              Arxiv
-            </Text>
+            <Text style={styles.heading}>Arxiv</Text>
             <View style={{ ...styles.inputView, ...styles.shadow }}>
               <EvilIcons name="search" size={24} color="#d0d0d0" />
               <TextInput
                 style={styles.input}
-                onChangeText={(text) => searchFunc(text)}
+                onChangeText={(text) =>
+                  searchUsers({ [LINK_TYPES.ARCHIVE]: text })
+                }
                 placeholder="Ism, Manzil, Tel Nomer"
               />
             </View>
 
             <View>
               {isLoading ? (
-                <View
-                  style={{
-                    height: '70%',
-                    alignItems: 'center',
-                    justifyContent: 'center'
-                  }}
-                >
+                <View style={styles.spinner}>
                   <ActivityIndicator size="large" />
                 </View>
               ) : error ? (
-                <View style={{ padding: 20 }}>
-                  <Text
-                    style={{
-                      fontSize: 20,
-                      textAlign: 'center',
-                      fontWeight: 'bold'
-                    }}
-                  >
-                    {error}
-                  </Text>
-                </View>
+                <Text style={styles.errorTitle}>{error}</Text>
               ) : (
                 <FlatList
                   data={[...users].reverse()}
                   showsVerticalScrollIndicator={false}
                   keyExtractor={(item) => item._id.toString()}
                   renderItem={({ item }) => <BorrowerItem item={item} />}
-                  contentContainerStyle={{
-                    paddingBottom: 200,
-                    paddingHorizontal: 20
-                  }}
+                  contentContainerStyle={styles.listWrapper}
                 />
               )}
             </View>
@@ -172,6 +103,27 @@ export default ArchiveScreen
 const styles = StyleSheet.create({
   container: {
     flex: 1
+  },
+  heading: {
+    margin: 20,
+    fontSize: 32,
+    fontWeight: 'bold',
+    textAlign: 'center'
+  },
+  spinner: {
+    height: '70%',
+    alignItems: 'center',
+    justifyContent: 'center'
+  },
+  errorTitle: {
+    fontSize: 20,
+    textAlign: 'center',
+    fontWeight: 'bold',
+    margin: 20
+  },
+  listWrapper: {
+    paddingBottom: 200,
+    paddingHorizontal: 20
   },
   inputView: {
     alignItems: 'center',

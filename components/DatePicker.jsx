@@ -11,6 +11,8 @@ import moment from 'moment'
 
 const DatePicker = ({ selectedDate, onDateChange }) => {
   const [show, setShow] = useState(false)
+  const currentDate = new Date()
+  currentDate.setDate(currentDate.getDate() + 3)
 
   const showDatepicker = () => {
     if (Platform.OS === 'ios') {
@@ -45,8 +47,9 @@ const DatePicker = ({ selectedDate, onDateChange }) => {
           value={selectedDate}
           mode="date"
           onChange={handleDateChange}
-          minimumDate={new Date()}
+          minimumDate={currentDate}
           locale="uz-UZ"
+          textColor="black"
           positiveButton={{ label: 'OK', textColor: 'green' }}
         />
       )}

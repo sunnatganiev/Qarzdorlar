@@ -21,6 +21,8 @@ import KeyboardViewWrapper from '../components/KeyboardViewWrapper'
 import useTakePicture from '../hooks/useTakePicture'
 import ImagePreview from '../components/ImagePreview'
 import AddBorrow from '../components/AddBorrow'
+import { useUserContext } from '../contexts/userContext'
+import { useDebtUsers } from '../hooks/useDebtUsers'
 
 const TransactionScreen = ({ route }) => {
   const { user, type } = route.params
@@ -30,6 +32,8 @@ const TransactionScreen = ({ route }) => {
   const [phone, setPhone] = useState(user.phoneNumber || '')
   const [address, setAddress] = useState(user.address || '')
   const [paymentAmount, setPaymentAmount] = useState(0)
+  const { fetchUsers } = useUserContext()
+  const { LINK_TYPES } = useDebtUsers()
 
   const navigation = useNavigation()
   const { image } = useTakePicture()
@@ -79,6 +83,7 @@ const TransactionScreen = ({ route }) => {
     )
 
     if (res.status === 'success') {
+      await fetchUsers(LINK_TYPES.ALL_USERS)
       setPaymentAmount('')
       setIsLoading(false)
       navigation.navigate('BorrowerDetail', {
@@ -92,9 +97,7 @@ const TransactionScreen = ({ route }) => {
 
   if (isLoading) {
     return (
-      <SafeAreaView
-        style={{ flex: 1, alignItems: 'center', justifyContent: 'center' }}
-      >
+      <SafeAreaView style={styles.spinner}>
         <ActivityIndicator size="large" />
       </SafeAreaView>
     )
@@ -110,44 +113,20 @@ const TransactionScreen = ({ route }) => {
       >
         <SafeAreaView>
           <ScrollView keyboardShouldPersistTaps={'handled'}>
-            <View
-              style={{
-                padding: 10,
-                paddingRight: 20,
-                flexDirection: 'row',
-                alignItems: 'center',
-                justifyContent: 'space-between'
-              }}
-            >
+            <View style={styles.header}>
               <TouchableOpacity onPress={() => navigation.goBack()}>
                 <Entypo name="chevron-left" size={30} color="black" />
               </TouchableOpacity>
               <View>
-                <Text
-                  style={{
-                    fontSize: 30,
-                    fontWeight: 'bold',
-                    textAlign: 'right'
-                  }}
-                >
-                  {name}
-                </Text>
-                <Text
-                  style={{
-                    textAlign: 'right',
-                    fontWeight: 'bold',
-                    fontSize: 16,
-                    color: 'gray',
-                    marginTop: 6
-                  }}
-                >
+                <Text style={styles.nameText}>{name}</Text>
+                <Text style={styles.userInfo}>
                   {address} +998 {phone || user.phoneNumber}
                 </Text>
               </View>
             </View>
             {type !== 'edit' ? (
               <>
-                <View style={{ paddingHorizontal: 20 }}>
+                <View style={styles.addBorrow}>
                   {type !== 'receive' ? (
                     <AddBorrow
                       setIsLoading={setIsLoading}
@@ -186,7 +165,7 @@ const TransactionScreen = ({ route }) => {
                 </View>
               </>
             ) : (
-              <View style={{ paddingHorizontal: 20, marginTop: 20, gap: 30 }}>
+              <View style={styles.userInfoEdit}>
                 <View style={styles.inputView}>
                   <TextInput
                     placeholder="Ism"
@@ -247,6 +226,7 @@ const TransactionScreen = ({ route }) => {
 export default TransactionScreen
 
 const styles = StyleSheet.create({
+  spinner: { flex: 1, alignItems: 'center', justifyContent: 'center' },
   inputView: {
     alignItems: 'start',
     borderColor: '#d0d0d0',
@@ -260,6 +240,27 @@ const styles = StyleSheet.create({
     shadowOpacity: 0.1,
     elevation: 3
   },
+  header: {
+    padding: 10,
+    paddingRight: 20,
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between'
+  },
+  nameText: {
+    fontSize: 30,
+    fontWeight: 'bold',
+    textAlign: 'right'
+  },
+  userInfo: {
+    textAlign: 'right',
+    fontWeight: 'bold',
+    fontSize: 16,
+    color: 'gray',
+    marginTop: 6
+  },
+  addBorrow: { paddingHorizontal: 20, marginBottom: 20 },
+  userInfoEdit: { paddingHorizontal: 20, marginTop: 20, gap: 30 },
   halfInput: {
     width: '50%',
     marginTop: 0
