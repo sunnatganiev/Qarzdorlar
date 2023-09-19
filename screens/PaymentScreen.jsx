@@ -11,7 +11,7 @@ const PaymentScreen = () => {
   const fetchServiceFee = async () => {
     try {
       const currentServiceFee = await sendAuthenticatedRequest('/payment')
-      console.log(currentServiceFee)
+      console.log({ currentServiceFee })
       if (currentServiceFee.status === 'success') {
         setServiceFee(currentServiceFee.payment)
       } else {
@@ -27,11 +27,17 @@ const PaymentScreen = () => {
   }, [])
 
   const handleLinkPress = async () => {
-    const deepLink = `https://my.click.uz/clickp2p/7AFC50ED97F7AC54AD41DA6564138BE93CA2A9766225FF966D41DCB8002AFF9C`
+    // const deepLink = `https://my.click.uz/clickp2p/7AFC50ED97F7AC54AD41DA6564138BE93CA2A9766225FF966D41DCB8002AFF9C`
 
-    Linking.openURL(deepLink).catch((err) =>
-      console.error('Error opening deep link:', err)
-    )
+    // Linking.openURL(deepLink).catch((err) =>
+    //   console.error('Error opening deep link:', err)
+    // )
+    try {
+      const res = await sendAuthenticatedRequest('/settings')
+      console.log({ res })
+    } catch (error) {
+      console.log('PaymentScreen: ', error.message)
+    }
   }
 
   return (
@@ -71,7 +77,7 @@ const styles = StyleSheet.create({
     alignSelf: 'center',
     marginTop: 20,
     paddingHorizontal: 16,
-    paddingVertical: 12,
+    paddingVertical: 8,
     backgroundColor: '#fff',
     shadowColor: 'black',
     shadowOffset: { width: 1, height: 3 },

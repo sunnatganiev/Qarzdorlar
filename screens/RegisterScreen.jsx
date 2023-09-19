@@ -14,7 +14,7 @@ import { useNavigation } from '@react-navigation/native'
 import KeyboardViewWrapper from '../components/KeyboardViewWrapper'
 import { Entypo } from '@expo/vector-icons'
 import { PhoneInput } from 'react-native-international-phone-number'
-import AsyncStorage from '@react-native-async-storage/async-storage'
+import * as SecureStore from 'expo-secure-store'
 
 const RegisterScreen = () => {
   const [phone, setPhone] = useState('')
@@ -24,11 +24,10 @@ const RegisterScreen = () => {
   useEffect(() => {
     const checkLoginStatus = async () => {
       try {
-        console.log('Register page')
-        // await AsyncStorage.removeItem('authToken')
-        const token = await AsyncStorage.getItem('authToken')
+        // await SecureStore.deleteItemAsync('owner')
+        const data = JSON.parse(await SecureStore.getItemAsync('owner'))
 
-        if (token) {
+        if (data?.token) {
           navigation.replace('Main')
         }
       } catch (error) {
@@ -188,7 +187,7 @@ const RegisterScreen = () => {
               borderRadius: 100,
               backgroundColor: '#28b485'
             }}
-            onPress={() => navigation.navigate('Login')}
+            onPress={() => navigation.replace('Login')}
           >
             <Text style={{ color: '#fff', fontWeight: 'bold' }}>
               Tizimga kirish

@@ -33,8 +33,8 @@ export const useDebtUsers = () => {
 
         setUsers(data.data?.users)
       } catch (err) {
-        console.error('Error fetching users:', err)
-        setError('Error fetching users')
+        console.error('Error fetching users:', err.message)
+        setError(err.message)
       } finally {
         setIsLoading(false)
       }
