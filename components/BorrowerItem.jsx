@@ -1,16 +1,20 @@
-import { View, Text, StyleSheet, Pressable } from 'react-native'
+import { View, Text, StyleSheet, TouchableOpacity } from 'react-native'
 import React from 'react'
 import { useNavigation } from '@react-navigation/native'
 import { Ionicons } from '@expo/vector-icons'
 
-const BorrowerItem = ({ item }) => {
+const BorrowerItem = ({ item, archive }) => {
   const navigator = useNavigation()
 
   return (
-    <Pressable
+    <TouchableOpacity
       style={styles.container}
       onPress={() =>
-        navigator.navigate('BorrowerDetail', { id: item._id, type: item.type })
+        navigator.navigate('BorrowerDetail', {
+          id: item._id,
+          type: item.type,
+          archive
+        })
       }
     >
       <View style={styles.heading}>
@@ -24,7 +28,7 @@ const BorrowerItem = ({ item }) => {
         </Text>
         <Ionicons name="chevron-forward" size={24} color="#28b485" />
       </View>
-    </Pressable>
+    </TouchableOpacity>
   )
 }
 

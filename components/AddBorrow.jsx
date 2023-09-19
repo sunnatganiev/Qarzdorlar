@@ -2,7 +2,6 @@ import {
   View,
   Text,
   Pressable,
-  Image,
   TouchableOpacity,
   Alert,
   StyleSheet
@@ -10,10 +9,8 @@ import {
 import React, { useEffect, useState } from 'react'
 import Product from './Product'
 import NumberInput from './NumberInput'
-import { FontAwesome } from '@expo/vector-icons'
 import { CheckBox } from 'react-native-elements'
 import DatePicker from './DatePicker'
-import useTakePicture from '../hooks/useTakePicture'
 import uuid from 'react-native-uuid'
 import PropTypes from 'prop-types'
 import { sendAuthenticatedRequest } from '../helpers/sendRequest'
@@ -21,6 +18,7 @@ import useNotification from '../hooks/useNotification'
 import { useNavigation } from '@react-navigation/native'
 import { useUserContext } from '../contexts/userContext'
 import { useDebtUsers } from '../hooks/useDebtUsers'
+import TakeImage from './TakeImage'
 
 const initialProduct = {
   name: '',
@@ -29,17 +27,12 @@ const initialProduct = {
   totalPrice: ''
 }
 
-const AddBorrow = ({
-  setModalVisible,
-  setIsLoading,
-  newBorrower,
-  addBorrow
-}) => {
+const AddBorrow = ({ setIsLoading, newBorrower, addBorrow }) => {
   const [products, setProducts] = useState([])
   const [qoldiq, setQoldiq] = useState(0)
   const [paymentAmount, setPaymentAmount] = useState(0)
   const [totalPriceOfProduct, setTotalPriceOfProduct] = useState(0)
-  const { image, setImage, isImgLoading, handleTakePicture } = useTakePicture()
+  const [image, setImage] = useState('')
   const currentDate = new Date()
   currentDate.setDate(currentDate.getDate() + 3)
 
@@ -51,30 +44,6 @@ const AddBorrow = ({
   const { fetchUsers } = useUserContext()
 
   const { LINK_TYPES } = useDebtUsers()
-
-  const handlePicture = () => {
-    if (image) {
-      Alert.alert(
-        `Yuklangan rasm o'chiriladi`,
-        `Yangi rasm yuklash uchun eskisi o'chiriladi`,
-        [
-          {
-            text: 'Bekor qilish',
-            style: 'cancel'
-          },
-          {
-            text: 'Davom etish',
-            onPress: () => {
-              handleTakePicture()
-            },
-            style: 'default'
-          }
-        ]
-      )
-    } else {
-      handleTakePicture()
-    }
-  }
 
   const handleCheckboxToggle = () => {
     const lend = totalPriceOfProduct - paymentAmount
@@ -115,7 +84,8 @@ const AddBorrow = ({
     if (
       newBorrower?.name.trim() === '' ||
       !totalPriceOfProduct ||
-      newBorrower?.phone.trim() === ''
+      newBorrower?.phone.trim() === '' ||
+      newBorrower?.address === ''
     ) {
       isValid = false
     }
@@ -123,7 +93,7 @@ const AddBorrow = ({
     if (!isValid) {
       return Alert.alert(
         "Ism, telefon raqam yoki Jami Summa ma'lumoti kirgizilmagan",
-        "Iltimos ma'lumotlarni to'liq kirgizing",
+        "Iltimos ma'lumotlarini to'liq kirgizing",
         [
           {
             text: 'Yopish',
@@ -151,8 +121,8 @@ const AddBorrow = ({
     const reqBody = {
       name: newBorrower?.name,
       address: newBorrower?.address,
-      reminder: date,
       phoneNumber: newBorrower?.phone,
+      reminder: date,
       transactions,
       remain: -qoldiq
     }
@@ -170,9 +140,9 @@ const AddBorrow = ({
       setProducts([])
       setDate(new Date())
       setImage('')
-      setIsLoading(false)
       setIsChecked(false)
       await fetchUsers(LINK_TYPES.ALL_USERS)
+      setIsLoading(false)
       navigator.navigate('HomeScreen')
     }
   }
@@ -236,6 +206,9 @@ const AddBorrow = ({
   }
 
   const handleAdd = () => {
+    if (newBorrower?.phone.length < 11) {
+      return Alert.alert("Telefon raqam to'liq emas")
+    }
     if (addBorrow) {
       handleUpdateTransaction()
     } else {
@@ -311,6 +284,7 @@ const AddBorrow = ({
             keyboardType="numeric"
             onChange={setPaymentAmount}
             changedValue={paymentAmount}
+            maxNumber={totalPriceOfProduct}
           />
         </View>
       </View>
@@ -332,52 +306,22 @@ const AddBorrow = ({
         />
       </View>
 
-      {isImgLoading ? (
-        <View style={styles.inputView}>
-          <Text style={styles.label}>Rasm yuklanmoqda...</Text>
-        </View>
-      ) : (
-        image && (
-          <View style={styles.inputView}>
-            <Pressable
-              onPress={() => setModalVisible(true)}
-              style={styles.image}
-            >
-              <Image
-                source={{ uri: image }}
-                style={{ flex: 1 }}
-                onError={(error) =>
-                  console.error('Image loading error:', error)
-                }
-              />
-            </Pressable>
-          </View>
-        )
-      )}
-      <TouchableOpacity
-        style={[styles.inputView, styles.float]}
-        onPress={handlePicture}
-      >
-        <Text style={styles.label}>Rasm yuklash</Text>
-        <FontAwesome name="camera" size={24} color="black" />
-      </TouchableOpacity>
+      <TakeImage setImage={setImage} />
 
       {/* Eslatma Vaqti */}
 
       <DatePicker selectedDate={date} onDateChange={setDate} />
 
       {/* Qarzdor saqlash Butotn */}
-      <View style={styles.btnView}>
-        <TouchableOpacity onPress={handleAdd}>
-          <Text style={styles.btnText}>Qarzdorni saqlash</Text>
-        </TouchableOpacity>
-      </View>
+
+      <TouchableOpacity onPress={handleAdd} style={styles.btnView}>
+        <Text style={styles.btnText}>Qarzdorni saqlash</Text>
+      </TouchableOpacity>
     </View>
   )
 }
 
 AddBorrow.propTypes = {
-  setModalVisible: PropTypes.func.isRequired,
   setIsLoading: PropTypes.func.isRequired,
   setName: PropTypes.func,
   setPhone: PropTypes.func,

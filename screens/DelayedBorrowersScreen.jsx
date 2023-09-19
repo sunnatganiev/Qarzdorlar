@@ -1,11 +1,4 @@
-import {
-  View,
-  Text,
-  StyleSheet,
-  FlatList,
-  TextInput,
-  ActivityIndicator
-} from 'react-native'
+import { View, Text, StyleSheet, FlatList, TextInput } from 'react-native'
 import React, { useRef, useMemo, useCallback, useEffect } from 'react'
 import {
   BottomSheetModal,
@@ -18,6 +11,8 @@ import { EvilIcons } from '@expo/vector-icons'
 import KeyboardViewWrapper from '../components/KeyboardViewWrapper'
 import { useFocusEffect, useNavigation } from '@react-navigation/native'
 import { useDebtUsers } from '../hooks/useDebtUsers'
+import Error from '../components/Error'
+import Spinner from '../components/Spinner'
 
 const DelayedBorrowersScreen = () => {
   const { users, isLoading, error, fetchUsers, searchUsers, LINK_TYPES } =
@@ -68,32 +63,15 @@ const DelayedBorrowersScreen = () => {
                   searchUsers({ [LINK_TYPES.DELAYED]: text })
                 }
                 placeholder="Ism, Manzil, Tel Nomer"
+                placeholderTextColor="#bcb8b8"
               />
             </View>
 
             <View>
               {isLoading ? (
-                <View
-                  style={{
-                    height: '70%',
-                    alignItems: 'center',
-                    justifyContent: 'center'
-                  }}
-                >
-                  <ActivityIndicator size="large" />
-                </View>
+                <Spinner />
               ) : error ? (
-                <View style={{ padding: 20 }}>
-                  <Text
-                    style={{
-                      fontSize: 20,
-                      textAlign: 'center',
-                      fontWeight: 'bold'
-                    }}
-                  >
-                    {error}
-                  </Text>
-                </View>
+                <Error error={error} />
               ) : (
                 <FlatList
                   data={users}
@@ -144,6 +122,7 @@ const styles = StyleSheet.create({
     textAlign: 'center',
     flex: 1
   },
+
   inputView: {
     alignItems: 'center',
     borderColor: '#d0d0d0',

@@ -18,6 +18,8 @@ export const UserProvider = ({ children }) => {
   const { users, isLoading, error, fetchUsers, searchUsers, LINK_TYPES } =
     useDebtUsers()
 
+  console.log({ users })
+
   useEffect(() => {
     fetchUsers(LINK_TYPES.ALL_USERS)
   }, [fetchUsers, LINK_TYPES.ALL_USERS])
