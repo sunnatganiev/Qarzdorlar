@@ -1,27 +1,22 @@
-import {
-  View,
-  Text,
-  StyleSheet,
-  FlatList,
-  ActivityIndicator,
-  TouchableOpacity
-} from 'react-native'
-import React, { useCallback, useState } from 'react'
+import { View, Text, StyleSheet, FlatList } from 'react-native'
+import React, { useCallback, useEffect, useState } from 'react'
 import BorrowerItem from '../components/BorrowerItem'
 import { useFocusEffect } from '@react-navigation/native'
 import KeyboardViewWrapper from '../components/KeyboardViewWrapper'
 import { useUserContext } from '../contexts/userContext'
 import useSort from '../hooks/useSort'
+import Error from '../components/Error'
+import Spinner from '../components/Spinner'
 
 const QarzdorlarScreen = () => {
   const [totalRemain, setTotalRemain] = useState(0)
-  const { users, isLoading, error } = useUserContext()
-  const { Sort, sortedUsers } = useSort(users)
+  const { isLoading, error } = useUserContext()
+  const { Sort, sortedUsers, setSorted } = useSort()
 
   useFocusEffect(
     useCallback(() => {
-      setTotalRemain(users.reduce((sum, item) => sum + item.remain, 0))
-    }, [users])
+      setTotalRemain(sortedUsers.reduce((sum, item) => sum + item.remain, 0))
+    }, [sortedUsers])
   )
 
   return (
@@ -36,23 +31,16 @@ const QarzdorlarScreen = () => {
       <View style={styles.borrowersContainer}>
         <View>
           {isLoading ? (
-            <View style={styles.spinnerContainer}>
-              <ActivityIndicator size="large" />
-            </View>
+            <Spinner />
           ) : error ? (
-            <View style={{ padding: 20 }}>
-              <Text style={styles.errorTitle}>{error}</Text>
-            </View>
+            <Error error={error} />
           ) : (
             <FlatList
               data={sortedUsers}
               keyExtractor={(item) => item._id.toString()}
               renderItem={({ item }) => <BorrowerItem item={item} />}
               showsVerticalScrollIndicator={false}
-              contentContainerStyle={{
-                paddingBottom: 200,
-                paddingHorizontal: 20
-              }}
+              contentContainerStyle={styles.listContainer}
             />
           )}
         </View>
@@ -88,16 +76,6 @@ const styles = StyleSheet.create({
     color: 'white',
     textTransform: 'uppercase'
   },
-  spinnerContainer: {
-    height: '70%',
-    alignItems: 'center',
-    justifyContent: 'center'
-  },
-  errorTitle: {
-    fontSize: 20,
-    textAlign: 'center',
-    fontWeight: 'bold'
-  },
   input: {
     height: 30,
     fontSize: 20,
@@ -113,5 +91,9 @@ const styles = StyleSheet.create({
     paddingHorizontal: 16,
     paddingVertical: 12
   },
-  btnText: { color: '#fff', fontSize: 16, fontWeight: 'bold' }
+  btnText: { color: '#fff', fontSize: 16, fontWeight: 'bold' },
+  listContainer: {
+    paddingBottom: 200,
+    paddingHorizontal: 20
+  }
 })

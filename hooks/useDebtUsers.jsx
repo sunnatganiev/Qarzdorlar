@@ -22,6 +22,7 @@ export const useDebtUsers = () => {
       try {
         let link
         if (url === ALL_USERS) {
+          console.log('All Users fetched')
           link = '?remain[lt]=0'
         } else if (url === ARCHIVE) {
           link = '?remain[eq]=0'
@@ -30,10 +31,9 @@ export const useDebtUsers = () => {
         }
 
         const data = await sendAuthenticatedRequest(link)
-
+        setError('')
         setUsers(data.data?.users)
       } catch (err) {
-        console.error('Error fetching users:', err.message)
         setError(err.message)
       } finally {
         setIsLoading(false)
@@ -58,23 +58,19 @@ export const useDebtUsers = () => {
       } else if (query[ARCHIVE]) {
         link = `/search?search=${query[ARCHIVE]}&remain=0`
       } else if (query[DELAYED]) {
-        console.log('delayed query: ', query[DELAYED])
         link = `/expired?search=${query[DELAYED]}`
       }
 
       const res = await sendAuthenticatedRequest(link)
 
       if (res.status === 'success') {
-        console.log(res.data.users)
-
         setUsers(res.data.users)
         setError('')
       } else if (res.status === 'fail') {
         setError(res.message)
       }
     } catch (err) {
-      console.error('Search err', err)
-      setError(err)
+      setError(err.message)
     }
     setIsLoading(false)
   }, 700)

@@ -1,11 +1,4 @@
-import {
-  View,
-  Text,
-  StyleSheet,
-  FlatList,
-  TextInput,
-  ActivityIndicator
-} from 'react-native'
+import { View, Text, StyleSheet, FlatList, TextInput } from 'react-native'
 import React, { useRef, useMemo, useCallback } from 'react'
 import {
   BottomSheetModal,
@@ -18,6 +11,8 @@ import { EvilIcons } from '@expo/vector-icons'
 import KeyboardViewWrapper from '../components/KeyboardViewWrapper'
 import { useFocusEffect } from '@react-navigation/native'
 import { useDebtUsers } from '../hooks/useDebtUsers'
+import Error from '../components/Error'
+import Spinner from '../components/Spinner'
 
 const ArchiveScreen = () => {
   const { users, isLoading, error, fetchUsers, searchUsers, LINK_TYPES } =
@@ -60,22 +55,23 @@ const ArchiveScreen = () => {
                   searchUsers({ [LINK_TYPES.ARCHIVE]: text })
                 }
                 placeholder="Ism, Manzil, Tel Nomer"
+                placeholderTextColor="#bcb8b8"
               />
             </View>
 
             <View>
               {isLoading ? (
-                <View style={styles.spinner}>
-                  <ActivityIndicator size="large" />
-                </View>
+                <Spinner />
               ) : error ? (
-                <Text style={styles.errorTitle}>{error}</Text>
+                <Error error={error} />
               ) : (
                 <FlatList
                   data={[...users].reverse()}
                   showsVerticalScrollIndicator={false}
                   keyExtractor={(item) => item._id.toString()}
-                  renderItem={({ item }) => <BorrowerItem item={item} />}
+                  renderItem={({ item }) => (
+                    <BorrowerItem item={item} archive={true} />
+                  )}
                   contentContainerStyle={styles.listWrapper}
                 />
               )}
@@ -114,12 +110,6 @@ const styles = StyleSheet.create({
     height: '70%',
     alignItems: 'center',
     justifyContent: 'center'
-  },
-  errorTitle: {
-    fontSize: 20,
-    textAlign: 'center',
-    fontWeight: 'bold',
-    margin: 20
   },
   listWrapper: {
     paddingBottom: 200,

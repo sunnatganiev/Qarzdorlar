@@ -13,14 +13,14 @@ import moment from 'moment'
 import { LinearGradient } from 'expo-linear-gradient'
 import { useNavigation } from '@react-navigation/native'
 import ImagePreview from '../components/ImagePreview'
+import { Ionicons } from '@expo/vector-icons'
 
 const TransactionDetail = ({ route }) => {
   const [imgVisible, setImgVisible] = useState(false)
   const [modalVisible, setModalVisible] = useState(false)
   const handleCloseImagePreview = () => setModalVisible(false)
-
-  const { user, transaction } = route.params
-  const navigator = useNavigation()
+  const navigation = useNavigation()
+  const { transaction } = route.params
 
   return (
     <LinearGradient
@@ -42,17 +42,38 @@ const TransactionDetail = ({ route }) => {
                 padding: 20
               }}
             >
-              <View>
-                <Text
-                  style={{ fontSize: 18, fontWeight: 'bold', marginBottom: 2 }}
+              <View
+                style={{
+                  flexDirection: 'row',
+                  alignItems: 'center'
+                }}
+              >
+                <TouchableOpacity
+                  style={{ marginRight: 20 }}
+                  onPress={() => navigation.goBack()}
                 >
-                  {transaction.products.length
-                    ? 'Men qarz berganman'
-                    : 'Men olganman'}
-                </Text>
-                <Text style={{ fontSize: 18, fontWeight: 'bold' }}>
-                  {moment(transaction.time).format('DD.MM.YYYY')}
-                </Text>
+                  <Ionicons
+                    name="chevron-back-outline"
+                    size={30}
+                    color="black"
+                  />
+                </TouchableOpacity>
+                <View>
+                  <Text
+                    style={{
+                      fontSize: 18,
+                      fontWeight: 'bold',
+                      marginBottom: 2
+                    }}
+                  >
+                    {transaction.products.length
+                      ? 'Men qarz berganman'
+                      : 'Men olganman'}
+                  </Text>
+                  <Text style={{ fontSize: 18, fontWeight: 'bold' }}>
+                    {moment(transaction.time).format('DD.MM.YYYY')}
+                  </Text>
+                </View>
               </View>
               <View
                 style={{

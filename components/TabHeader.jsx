@@ -30,6 +30,7 @@ const TabHeader = () => {
           <View style={styles.inputView}>
             <TextInput
               placeholder="Ism, Manzil, Tel Nomer"
+              placeholderTextColor="#bcb8b8"
               style={styles.input}
               onChangeText={(text) =>
                 searchUsers({ [LINK_TYPES.ALL_USERS]: text })
@@ -79,9 +80,9 @@ const styles = StyleSheet.create({
     elevation: 3
   },
   input: {
-    fontSize: 20,
+    fontSize: 18,
     flex: 1,
     width: '100%',
-    marginRight: -50
+    marginRight: -40
   }
 })

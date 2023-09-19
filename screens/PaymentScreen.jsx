@@ -1,6 +1,7 @@
 import { Text, TouchableOpacity, StyleSheet, View, Image } from 'react-native'
 import React, { useEffect, useState } from 'react'
 import * as Linking from 'expo-linking'
+
 import { sendAuthenticatedRequest } from '../helpers/sendRequest'
 
 const PlaceholderImage = require('../assets/click.png')
@@ -11,7 +12,6 @@ const PaymentScreen = () => {
   const fetchServiceFee = async () => {
     try {
       const currentServiceFee = await sendAuthenticatedRequest('/payment')
-      console.log({ currentServiceFee })
       if (currentServiceFee.status === 'success') {
         setServiceFee(currentServiceFee.payment)
       } else {
@@ -26,18 +26,12 @@ const PaymentScreen = () => {
     fetchServiceFee()
   }, [])
 
-  const handleLinkPress = async () => {
-    // const deepLink = `https://my.click.uz/clickp2p/7AFC50ED97F7AC54AD41DA6564138BE93CA2A9766225FF966D41DCB8002AFF9C`
+  const handlePayment = async () => {
+    const deepLink = `https://my.click.uz/clickp2p/7AFC50ED97F7AC54AD41DA6564138BE93CA2A9766225FF966D41DCB8002AFF9C`
 
-    // Linking.openURL(deepLink).catch((err) =>
-    //   console.error('Error opening deep link:', err)
-    // )
-    try {
-      const res = await sendAuthenticatedRequest('/settings')
-      console.log({ res })
-    } catch (error) {
-      console.log('PaymentScreen: ', error.message)
-    }
+    Linking.openURL(deepLink).catch((err) =>
+      console.error('Error opening deep link:', err)
+    )
   }
 
   return (
@@ -47,12 +41,9 @@ const PaymentScreen = () => {
           {new Intl.NumberFormat('en-US').format(serviceFee)} So&apos;m
         </Text>
       </View>
-      <TouchableOpacity onPress={handleLinkPress} style={styles.btnView}>
+      <TouchableOpacity onPress={handlePayment} style={styles.btnView}>
         {/* <Text style={styles.btnText}>Click orqali to&apos;lash</Text> */}
-        <Image
-          source={PlaceholderImage}
-          style={{ height: 60, width: 112, resizeMode: 'contain' }}
-        />
+        <Image source={PlaceholderImage} style={styles.image} />
       </TouchableOpacity>
     </View>
   )
@@ -84,5 +75,6 @@ const styles = StyleSheet.create({
     shadowOpacity: 0.1,
     elevation: 3
   },
-  btnText: { color: '#fff', fontSize: 16, fontWeight: 'bold' }
+  btnText: { color: '#fff', fontSize: 16, fontWeight: 'bold' },
+  image: { height: 60, width: 112, resizeMode: 'contain' }
 })

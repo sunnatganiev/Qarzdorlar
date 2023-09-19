@@ -151,9 +151,6 @@ export function Drawers() {
   useEffect(() => {
     const getUserAccess = async () => {
       const data = JSON.parse(await SecureStore.getItemAsync('owner'))
-
-      console.log({ data: data.data.user })
-
       setHasAccess(data.data.user.access)
     }
 

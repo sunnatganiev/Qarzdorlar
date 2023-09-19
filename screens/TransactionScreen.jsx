@@ -4,7 +4,6 @@ import {
   Pressable,
   TouchableOpacity,
   StyleSheet,
-  ActivityIndicator,
   ScrollView,
   TextInput
 } from 'react-native'
@@ -18,15 +17,13 @@ import NumberInput from '../components/NumberInput'
 import { sendAuthenticatedRequest } from '../helpers/sendRequest'
 import { PhoneInput } from 'react-native-international-phone-number'
 import KeyboardViewWrapper from '../components/KeyboardViewWrapper'
-import useTakePicture from '../hooks/useTakePicture'
-import ImagePreview from '../components/ImagePreview'
 import AddBorrow from '../components/AddBorrow'
 import { useUserContext } from '../contexts/userContext'
 import { useDebtUsers } from '../hooks/useDebtUsers'
+import Spinner from '../components/Spinner'
 
 const TransactionScreen = ({ route }) => {
   const { user, type } = route.params
-  const [modalVisible, setModalVisible] = useState(false)
   const [isLoading, setIsLoading] = useState(false)
   const [name, setName] = useState(user.name || '')
   const [phone, setPhone] = useState(user.phoneNumber || '')
@@ -36,9 +33,6 @@ const TransactionScreen = ({ route }) => {
   const { LINK_TYPES } = useDebtUsers()
 
   const navigation = useNavigation()
-  const { image } = useTakePicture()
-
-  const handleCloseImagePreview = () => setModalVisible(false)
 
   const handleEdit = async () => {
     setIsLoading(true)
@@ -53,6 +47,7 @@ const TransactionScreen = ({ route }) => {
       const res = await sendAuthenticatedRequest(`/${user._id}`, 'PATCH', body)
 
       if (res.status === 'success') {
+        fetchUsers(LINK_TYPES.ALL_USERS)
         navigation.navigate('BorrowerDetail', { refresh: true, id: user._id })
       }
     } catch (error) {
@@ -96,11 +91,7 @@ const TransactionScreen = ({ route }) => {
   const addBorrow = { user, type }
 
   if (isLoading) {
-    return (
-      <SafeAreaView style={styles.spinner}>
-        <ActivityIndicator size="large" />
-      </SafeAreaView>
-    )
+    return <Spinner />
   }
 
   return (
@@ -130,7 +121,6 @@ const TransactionScreen = ({ route }) => {
                   {type !== 'receive' ? (
                     <AddBorrow
                       setIsLoading={setIsLoading}
-                      setModalVisible={setModalVisible}
                       addBorrow={addBorrow}
                     />
                   ) : (
@@ -145,6 +135,7 @@ const TransactionScreen = ({ route }) => {
                             keyboardType="numeric"
                             onChange={setPaymentAmount}
                             changedValue={paymentAmount}
+                            maxNumber={Math.abs(user.remain)}
                           />
                         </View>
                       </View>
@@ -203,21 +194,14 @@ const TransactionScreen = ({ route }) => {
                 </View>
 
                 <View style={{ alignItems: 'center' }}>
-                  <Pressable style={styles.btn} onPress={handleEdit}>
+                  <TouchableOpacity style={styles.btn} onPress={handleEdit}>
                     <Text style={styles.btnText}>Saqlash</Text>
-                  </Pressable>
+                  </TouchableOpacity>
                 </View>
               </View>
             )}
           </ScrollView>
         </SafeAreaView>
-
-        {/* Image Preview */}
-        <ImagePreview
-          visible={modalVisible}
-          imageUrl={image}
-          onClose={handleCloseImagePreview}
-        />
       </LinearGradient>
     </KeyboardViewWrapper>
   )

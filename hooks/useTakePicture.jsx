@@ -15,8 +15,8 @@ const useTakePicture = () => {
   const showPermissionAlert = useCallback(() => {
     // Display an alert to inform the user about the need for camera permissions
     Alert.alert(
-      'Camera Permission Required',
-      'Please enable camera permissions in settings to use this feature.',
+      'Kameraga ruxsat',
+      'Iltimos qurilma sozlamariga kirib dasturga kameradan foydalanishga ruxsat bering.',
       [
         {
           text: 'Cancel',
@@ -36,7 +36,6 @@ const useTakePicture = () => {
       const res = await Camera.requestCameraPermissionsAsync() // Request camera permissions using Camera from expo-camera
 
       if (res.status !== 'granted') {
-        console.log('Camera permission denied')
         showPermissionAlert()
       }
     }
@@ -83,11 +82,8 @@ const useTakePicture = () => {
       url = manipResult?.uri
     }
 
-    // console.log(result.assets[0]?.uri)
-
     const imgUri = await uploadImageAsync(url)
 
-    // console.log({ imgUri })
     setImage(imgUri)
     setIsImgLoading(false)
   }

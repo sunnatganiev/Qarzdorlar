@@ -7,7 +7,7 @@ import {
   Alert,
   TouchableOpacity
 } from 'react-native'
-import React, { useEffect, useState } from 'react'
+import React, { useEffect, useRef, useState } from 'react'
 import { Entypo } from '@expo/vector-icons'
 import { Feather } from '@expo/vector-icons'
 import NumberInput from './NumberInput'
@@ -16,8 +16,10 @@ const Product = ({ product: initialProduct, setProducts, removeProduct }) => {
   const [isExpanded, setIsExpanded] = useState(false)
   const [product, setProduct] = useState(initialProduct)
   const [totalPrice, setTotalPrice] = useState(0)
-  const [quantity, setQuantity] = useState('')
+  const [quantity, setQuantity] = useState(1)
   const [price, setPrice] = useState('')
+  const nameRef = useRef()
+  const priceRef = useRef()
 
   const handleRemoveProduct = () => {
     Alert.alert("Maxsulotni o'chirmoqchimisiz?", '', [
@@ -54,6 +56,13 @@ const Product = ({ product: initialProduct, setProducts, removeProduct }) => {
   }
 
   const handleAddProduct = () => {
+    if (!product.name) {
+      nameRef.current.focus()
+      return Alert.alert('Maxsulot nomi kirgizilmagan')
+    } else if (price <= 1) {
+      return Alert.alert('Maxsulot narxi kirgizilmagan')
+    }
+
     setIsExpanded(false)
 
     setProducts({ ...product, price, quantity, totalPrice })
@@ -116,6 +125,7 @@ const Product = ({ product: initialProduct, setProducts, removeProduct }) => {
             <Text style={styles.label}>Nomi</Text>
             <View style={styles.accordion}>
               <TextInput
+                ref={nameRef}
                 value={product.name}
                 onChangeText={(text) => setProduct({ ...product, name: text })}
                 placeholderTextColor={'gray'}
@@ -131,6 +141,7 @@ const Product = ({ product: initialProduct, setProducts, removeProduct }) => {
                 keyboardType="numeric"
                 onChange={(text) => setPrice(text || 1)}
                 changedValue={price}
+                ref={priceRef}
               />
             </View>
 

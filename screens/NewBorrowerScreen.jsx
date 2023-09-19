@@ -1,41 +1,23 @@
-import {
-  View,
-  Text,
-  TextInput,
-  StyleSheet,
-  ScrollView,
-  ActivityIndicator
-} from 'react-native'
+import { View, Text, TextInput, StyleSheet, ScrollView } from 'react-native'
 // import uuid from 'react-native-uuid'
 import React, { useState } from 'react'
-import { SafeAreaView } from 'react-native-safe-area-context'
 
 import { LinearGradient } from 'expo-linear-gradient'
-
 import { PhoneInput } from 'react-native-international-phone-number'
 import KeyboardViewWrapper from '../components/KeyboardViewWrapper'
-import ImagePreview from '../components/ImagePreview'
-
-import useNotification from '../hooks/useNotification'
 import AddBorrow from '../components/AddBorrow'
+import Spinner from '../components/Spinner'
 
 const NewBorrowerScreen = () => {
-  const [modalVisible, setModalVisible] = useState(false)
   const [name, setName] = useState('')
   const [phone, setPhone] = useState('')
   const [address, setAddress] = useState('')
   const [isLoading, setIsLoading] = useState(false)
-  const { image } = useNotification()
-  const handleCloseImagePreview = () => setModalVisible(false)
 
   const newBorrower = { setName, setPhone, setAddress, name, phone, address }
 
   if (isLoading) {
-    return (
-      <SafeAreaView style={styles.spinner}>
-        <ActivityIndicator size="large" />
-      </SafeAreaView>
-    )
+    return <Spinner />
   }
 
   return (
@@ -90,19 +72,8 @@ const NewBorrowerScreen = () => {
           </View>
 
           {/* AddBorrow Space */}
-          <AddBorrow
-            setModalVisible={setModalVisible}
-            setIsLoading={setIsLoading}
-            newBorrower={newBorrower}
-          />
+          <AddBorrow setIsLoading={setIsLoading} newBorrower={newBorrower} />
         </ScrollView>
-
-        {/* Image Preview */}
-        <ImagePreview
-          visible={modalVisible}
-          imageUrl={image}
-          onClose={handleCloseImagePreview}
-        />
       </LinearGradient>
     </KeyboardViewWrapper>
   )

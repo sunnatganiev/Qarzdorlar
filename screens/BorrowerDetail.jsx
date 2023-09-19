@@ -25,6 +25,7 @@ import HistoryItem from '../components/HistoryItem'
 import { sendAuthenticatedRequest } from '../helpers/sendRequest'
 import { useUserContext } from '../contexts/userContext'
 import { useDebtUsers } from '../hooks/useDebtUsers'
+import Spinner from '../components/Spinner'
 
 const BorrowerDetail = ({ route }) => {
   const [user, setUser] = useState(null)
@@ -47,7 +48,7 @@ const BorrowerDetail = ({ route }) => {
     useCallback(() => {
       const fetchUser = async () => {
         const res = await sendAuthenticatedRequest(`/${userId}`)
-        console.log(res.data)
+
         const newUser = res.data.oneUser
         setUser(newUser)
         setRemain(newUser.remain)
@@ -85,17 +86,18 @@ const BorrowerDetail = ({ route }) => {
   const handlePayAll = async () => {
     const pay = async () => {
       setIsLoading(true)
+
+      console.log(user)
+
       const transactions = [...user.transactions, { amount: -remain }]
       const body = {
         transactions,
         remain: 0
       }
 
-      const res = await sendAuthenticatedRequest(
-        `${process.env.EXPO_PUBLIC_BACK_END}/${user._id}`,
-        'PATCH',
-        body
-      )
+      console.log(user._id)
+
+      const res = await sendAuthenticatedRequest(`/${user._id}`, 'PATCH', body)
 
       if (res.status === 'success') {
         await fetchUsers(LINK_TYPES.ALL_USERS)
@@ -119,13 +121,7 @@ const BorrowerDetail = ({ route }) => {
   }
 
   if (!user) {
-    return (
-      <SafeAreaView
-        style={{ flex: 1, alignItems: 'center', justifyContent: 'center' }}
-      >
-        <ActivityIndicator size="large" />
-      </SafeAreaView>
-    )
+    return <Spinner />
   }
 
   return (
@@ -136,30 +132,13 @@ const BorrowerDetail = ({ route }) => {
         </TouchableOpacity>
         <View style={{ flexDirection: 'row', alignItems: 'center' }}>
           <View>
-            <Text
-              style={{ fontSize: 30, fontWeight: 'bold', textAlign: 'right' }}
-            >
-              {user?.name}
-            </Text>
-            <Text
-              style={{
-                textAlign: 'right',
-                fontWeight: 'bold',
-                fontSize: 16,
-                color: 'gray',
-                marginTop: 6
-              }}
-            >
+            <Text style={styles.name}>{user?.name}</Text>
+            <Text style={styles.phone}>
               {user.address} +998 {user.phoneNumber}
             </Text>
           </View>
           <TouchableOpacity
-            style={{
-              padding: 10,
-              backgroundColor: '#d0d0d0',
-              borderRadius: 100,
-              marginLeft: 10
-            }}
+            style={styles.editBtn}
             onPress={() =>
               navigator.navigate('TransactionScreen', { user, type: 'edit' })
             }
@@ -185,17 +164,7 @@ const BorrowerDetail = ({ route }) => {
                     borderBottomRightRadius: 10
                   }}
                 >
-                  <Text
-                    style={{
-                      fontWeight: 'bold',
-                      fontSize: 16,
-                      color: '#fff',
-                      textAlign: 'center'
-                    }}
-                  >
-                    {/* {moment(user.reminder).format('DD.MM.YY')} */}
-                    {daysLeft}
-                  </Text>
+                  <Text style={styles.badgeText}>{daysLeft}</Text>
                 </View>
                 <View style={{ marginBottom: 20 }}>
                   <Text style={{ fontSize: 30, fontWeight: 'bold' }}>
@@ -205,55 +174,74 @@ const BorrowerDetail = ({ route }) => {
                 <View
                   style={{
                     flexDirection: 'row',
-                    justifyContent: 'space-between'
+                    justifyContent:
+                      route.params.archive || user.remain === 0
+                        ? 'center'
+                        : 'space-between'
                   }}
                 >
+                  {!route.params.archive && user.remain !== 0 && (
+                    <View style={{ alignItems: 'center' }}>
+                      <TouchableOpacity
+                        style={styles.iconBox}
+                        onPress={() =>
+                          navigator.navigate('TransactionScreen', {
+                            user,
+                            type: 'receive'
+                          })
+                        }
+                      >
+                        <FontAwesome5 name="minus" size={20} color="black" />
+                      </TouchableOpacity>
+                      <Text
+                        style={{
+                          fontWeight: 'bold',
+                          fontSize: 14,
+                          marginTop: 5
+                        }}
+                      >
+                        Olish
+                      </Text>
+                    </View>
+                  )}
+
                   <View style={{ alignItems: 'center' }}>
-                    <Pressable
-                      style={styles.iconBox}
-                      onPress={() =>
-                        navigator.navigate('TransactionScreen', {
-                          user,
-                          type: 'receive'
-                        })
-                      }
-                    >
-                      <FontAwesome5 name="minus" size={20} color="black" />
-                    </Pressable>
-                    <Text
-                      style={{ fontWeight: 'bold', fontSize: 14, marginTop: 5 }}
-                    >
-                      Olish
-                    </Text>
-                  </View>
-                  <View style={{ alignItems: 'center' }}>
-                    <Pressable
+                    <TouchableOpacity
                       style={styles.iconBox}
                       onPress={() =>
                         navigator.navigate('TransactionScreen', { user })
                       }
                     >
                       <FontAwesome5 name="plus" size={20} color="black" />
-                    </Pressable>
+                    </TouchableOpacity>
                     <Text
                       style={{ fontWeight: 'bold', fontSize: 14, marginTop: 5 }}
                     >
                       Qo&apos;shish
                     </Text>
                   </View>
-                  <View style={{ alignItems: 'center' }}>
-                    <TouchableOpacity
-                      style={{ ...styles.iconBox, backgroundColor: '#28b485' }}
-                      onPress={handlePayAll}
-                    >
-                      <FontAwesome5 name="check" size={20} color="#fff" />
-                    </TouchableOpacity>
-                    <Text
-                      style={{ fontWeight: 'bold', fontSize: 14, marginTop: 5 }}
-                    >
-                      To&apos;lash
-                    </Text>
-                  </View>
+                  {!route.params.archive && user.remain !== 0 && (
+                    <View style={{ alignItems: 'center' }}>
+                      <TouchableOpacity
+                        style={{
+                          ...styles.iconBox,
+                          backgroundColor: '#28b485'
+                        }}
+                        onPress={handlePayAll}
+                      >
+                        <FontAwesome5 name="check" size={20} color="#fff" />
+                      </TouchableOpacity>
+                      <Text
+                        style={{
+                          fontWeight: 'bold',
+                          fontSize: 14,
+                          marginTop: 5
+                        }}
+                      >
+                        To&apos;lash
+                      </Text>
+                    </View>
+                  )}
                 </View>
               </>
             )}
@@ -274,24 +262,8 @@ const BorrowerDetail = ({ route }) => {
 
         {/* Tarix */}
         <View>
-          <Text
-            style={{
-              margin: 20,
-              marginBottom: -12,
-              fontSize: 18,
-              fontWeight: 'bold'
-            }}
-          >
-            Tarix
-          </Text>
-          <View
-            style={{
-              ...styles.container,
-              paddingHorizontal: 15,
-              paddingVertical: 0,
-              marginBottom: 70
-            }}
-          >
+          <Text style={styles.historyLabel}>Tarix</Text>
+          <View style={[styles.container, styles.historyContainer]}>
             {[...user.transactions].reverse().map((item, index) => (
               <HistoryItem user={user} transaction={item} key={index} />
             ))}
@@ -341,5 +313,36 @@ const styles = StyleSheet.create({
     paddingVertical: 12,
     flexDirection: 'row'
   },
-  btnText: { color: '#fff', fontSize: 16, fontWeight: 'bold', marginLeft: 10 }
+  btnText: { color: '#fff', fontSize: 16, fontWeight: 'bold', marginLeft: 10 },
+  badgeText: {
+    fontWeight: 'bold',
+    fontSize: 16,
+    color: '#fff',
+    textAlign: 'center'
+  },
+  editBtn: {
+    padding: 10,
+    backgroundColor: '#d0d0d0',
+    borderRadius: 100,
+    marginLeft: 10
+  },
+  name: { fontSize: 30, fontWeight: 'bold', textAlign: 'right' },
+  phone: {
+    textAlign: 'right',
+    fontWeight: 'bold',
+    fontSize: 16,
+    color: 'gray',
+    marginTop: 6
+  },
+  historyLabel: {
+    margin: 20,
+    marginBottom: -12,
+    fontSize: 18,
+    fontWeight: 'bold'
+  },
+  historyContainer: {
+    paddingHorizontal: 15,
+    paddingVertical: 0,
+    marginBottom: 70
+  }
 })
