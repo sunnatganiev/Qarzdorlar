@@ -10,10 +10,10 @@ import {
   TouchableOpacity
 } from 'react-native'
 import React, { useState, useEffect } from 'react'
-import AsyncStorage from '@react-native-async-storage/async-storage'
 import KeyboardViewWrapper from '../components/KeyboardViewWrapper'
 import { useNavigation } from '@react-navigation/native'
 import { PhoneInput } from 'react-native-international-phone-number'
+import * as SecureStore from 'expo-secure-store'
 
 const LoginScreen = () => {
   const [phone, setPhone] = useState('')
@@ -22,10 +22,10 @@ const LoginScreen = () => {
   useEffect(() => {
     const checkLoginStatus = async () => {
       try {
-        // await AsyncStorage.removeItem('authToken')
-        const token = await AsyncStorage.getItem('authToken')
+        // await SecureStore.deleteItemAsync('owner')
+        const data = JSON.parse(await SecureStore.getItemAsync('owner'))
 
-        if (token) {
+        if (data?.token) {
           navigation.replace('Main')
         }
       } catch (error) {
@@ -124,7 +124,7 @@ const LoginScreen = () => {
 
         <View style={styles.btnWrapper}>
           <TouchableOpacity style={styles.btnView} onPress={handleLogin}>
-            <Text style={styles.btnText}>Login</Text>
+            <Text style={styles.btnText}>Kirish</Text>
           </TouchableOpacity>
         </View>
 
@@ -146,7 +146,7 @@ const LoginScreen = () => {
               borderRadius: 100,
               backgroundColor: '#28b485'
             }}
-            onPress={() => navigation.navigate('Register')}
+            onPress={() => navigation.replace('Register')}
           >
             <Text style={{ color: '#fff', fontWeight: 'bold' }}>
               Ro&apos;yxatdan o&apos;tish

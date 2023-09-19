@@ -1,17 +1,9 @@
-import React, { useCallback, useEffect, useState } from 'react'
-import {
-  View,
-  Text,
-  Button,
-  StyleSheet,
-  Alert,
-  Platform,
-  Pressable
-} from 'react-native'
+import React, { useCallback, useState } from 'react'
+import { View, Text, StyleSheet, Alert, Platform } from 'react-native'
 import OTPInputView from '@twotalltotems/react-native-otp-input'
 import { FontAwesome5 } from '@expo/vector-icons'
 import { SafeAreaView } from 'react-native-safe-area-context'
-import AsyncStorage from '@react-native-async-storage/async-storage'
+import * as SecureStore from 'expo-secure-store'
 import OTPInput from 'react-native-otp-withpaste'
 import axios from 'axios'
 import { useFocusEffect, useNavigation } from '@react-navigation/native'
@@ -26,21 +18,19 @@ const OTPScreen = ({ route }) => {
     setOTP(code)
   }
 
-  console.log(navigation)
-
   useFocusEffect(
     useCallback(() => {
-      const storeToken = async (authToken) => {
+      const storeCurrentUser = async (owner) => {
         try {
-          await AsyncStorage.setItem('authToken', authToken)
-          const token = await AsyncStorage.getItem('authToken')
-          if (token) {
+          await SecureStore.setItemAsync('owner', owner)
+          const data = JSON.parse(await SecureStore.getItemAsync('owner'))
+
+          if (data?.token) {
             setTimeout(() => {
               navigation.replace('Main')
             }, 400)
           }
         } catch (error) {
-          // console.error('Error storing token:', error);
           Alert.alert(error.message)
         }
       }
@@ -54,7 +44,7 @@ const OTPScreen = ({ route }) => {
           })
           .then((res) => {
             setOTP('')
-            storeToken(res.data.token)
+            storeCurrentUser(JSON.stringify(res.data))
           })
           .catch((err) => {
             Alert.alert(
@@ -64,7 +54,7 @@ const OTPScreen = ({ route }) => {
             console.error('error', err.message)
           })
       }
-    }, [otp])
+    }, [otp, navigation, phoneNumber])
   )
 
   return (

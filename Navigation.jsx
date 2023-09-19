@@ -1,4 +1,4 @@
-import React from 'react'
+import React, { Fragment, useEffect, useState } from 'react'
 import { createNativeStackNavigator } from '@react-navigation/native-stack'
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs'
 import { Ionicons } from '@expo/vector-icons'
@@ -8,13 +8,19 @@ import NewBorrowerScreen from './screens/NewBorrowerScreen'
 import BorrowerDetail from './screens/BorrowerDetail'
 import TransactionScreen from './screens/TransactionScreen'
 import TransactionDetail from './screens/TransactionDetail'
-import { createDrawerNavigator } from '@react-navigation/drawer'
+import {
+  createDrawerNavigator,
+  DrawerContentScrollView,
+  DrawerItemList
+} from '@react-navigation/drawer'
 import DelayedBorrowersScreen from './screens/DelayedBorrowersScreen'
 import TabHeader from './components/TabHeader'
 import PaymentScreen from './screens/PaymentScreen'
 import { FontAwesome } from '@expo/vector-icons'
-import { UserProvider } from './contexts/userContext'
 import DrawerHeader from './components/DrawerHeder'
+import { Text, TouchableOpacity, View, StyleSheet } from 'react-native'
+import * as SecureStore from 'expo-secure-store'
+import LogoutButton from './components/LogoutButton'
 
 const Stack = createNativeStackNavigator()
 const Drawer = createDrawerNavigator()
@@ -104,7 +110,56 @@ const StackGroup = () => {
   )
 }
 
+const RestrictedScreen = ({ navigation }) => {
+  const navigateToPayment = () => {
+    navigation.navigate("To'lov")
+  }
+
+  return (
+    <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
+      <Text
+        style={{
+          width: '70%',
+          textAlign: 'center',
+          fontWeight: 'bold',
+          fontSize: 20
+        }}
+      >
+        Dasturdan foydalanishni davom ettirish uchun to&apos;lov qiling
+      </Text>
+      <TouchableOpacity onPress={navigateToPayment} style={styles.btnView}>
+        <Text style={styles.btnText}>To&apos;lov sahifasiga o&apos;tish</Text>
+      </TouchableOpacity>
+    </View>
+  )
+}
+
+export default RestrictedScreen
+
+const DrawerContent = (props) => (
+  <View style={{ flex: 1 }}>
+    <DrawerContentScrollView {...props}>
+      <DrawerItemList {...props} />
+    </DrawerContentScrollView>
+    <LogoutButton navigation={props.navigation} />
+  </View>
+)
+
 export function Drawers() {
+  const [hasAccess, setHasAccess] = useState(false)
+
+  useEffect(() => {
+    const getUserAccess = async () => {
+      const data = JSON.parse(await SecureStore.getItemAsync('owner'))
+
+      console.log({ data: data.data.user })
+
+      setHasAccess(data.data.user.access)
+    }
+
+    getUserAccess()
+  }, [])
+
   const getTabBarIcon = (route, focused) => {
     let iconName
 
@@ -124,23 +179,40 @@ export function Drawers() {
   const getHeader = () => <DrawerHeader />
 
   return (
-    <UserProvider>
-      <Drawer.Navigator
-        screenOptions={({ route }) => ({
-          drawerIcon: ({ focused }) => getTabBarIcon(route, focused),
-          drawerLabelStyle: {
-            marginLeft: -20,
-            fontSize: 16,
-            color: '#28b485'
-          },
-          header: () => getHeader(),
-          headerTransparent: true
-        })}
-      >
-        <Drawer.Screen name="Asosiy sahifa" component={StackGroup} />
-        <Drawer.Screen name="Arxiv" component={ArchiveScreen} />
-        <Drawer.Screen name="To'lov" component={PaymentScreen} />
-      </Drawer.Navigator>
-    </UserProvider>
+    <Drawer.Navigator
+      screenOptions={({ route }) => ({
+        drawerIcon: ({ focused }) => getTabBarIcon(route, focused),
+        drawerLabelStyle: {
+          marginLeft: -20,
+          fontSize: 16,
+          color: '#28b485'
+        },
+        header: () => getHeader(),
+        headerTransparent: true
+      })}
+      drawerContent={DrawerContent}
+    >
+      {hasAccess ? (
+        <>
+          <Drawer.Screen name="Asosiy sahifa" component={StackGroup} />
+          <Drawer.Screen name="Arxiv" component={ArchiveScreen} />
+        </>
+      ) : (
+        <Drawer.Screen name="Restriction" component={RestrictedScreen} />
+      )}
+      <Drawer.Screen name="To'lov" component={PaymentScreen} />
+    </Drawer.Navigator>
   )
 }
+
+const styles = StyleSheet.create({
+  btnView: {
+    backgroundColor: '#55c57a',
+    borderRadius: 100,
+    alignSelf: 'center',
+    marginTop: 20,
+    paddingHorizontal: 16,
+    paddingVertical: 12
+  },
+  btnText: { color: '#fff', fontSize: 16, fontWeight: 'bold' }
+})
