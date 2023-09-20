@@ -9,7 +9,6 @@ import { manipulateAsync, SaveFormat } from 'expo-image-manipulator'
 const useTakePicture = () => {
   const [isImgLoading, setIsImgLoading] = useState(false)
   const [image, setImage] = useState('')
-  // const [permission, requestPermission] = Camera.useCameraPermissions()
 
   // Function to show permission alert
   const showPermissionAlert = useCallback(() => {
