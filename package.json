@@ -1,5 +1,6 @@
 {
-  "name": "qarzdorlar1.0",
+  "name": "qarzdorlar",
+  "slug": "qarzdorlar",
   "version": "1.0.0",
   "main": "node_modules/expo/AppEntry.js",
   "scripts": {
