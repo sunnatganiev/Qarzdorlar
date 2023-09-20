@@ -19,7 +19,7 @@ const useSort = () => {
       setSortedUsers(updatedUsers)
       setSorted(true)
     } else {
-      setSortedUsers(users)
+      setSortedUsers([...users])
       setSorted(false)
     }
   }

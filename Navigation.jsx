@@ -146,7 +146,7 @@ const DrawerContent = (props) => (
 )
 
 export function Drawers() {
-  const [hasAccess, setHasAccess] = useState(false)
+  const [hasAccess, setHasAccess] = useState(true)
 
   useEffect(() => {
     const getUserAccess = async () => {

@@ -1,22 +1,21 @@
 import { View, Text, StyleSheet, FlatList } from 'react-native'
-import React, { useCallback, useEffect, useState } from 'react'
+import React, { useCallback, useState } from 'react'
 import BorrowerItem from '../components/BorrowerItem'
+
 import { useFocusEffect } from '@react-navigation/native'
 import KeyboardViewWrapper from '../components/KeyboardViewWrapper'
 import { useUserContext } from '../contexts/userContext'
-import useSort from '../hooks/useSort'
 import Error from '../components/Error'
 import Spinner from '../components/Spinner'
 
 const QarzdorlarScreen = () => {
   const [totalRemain, setTotalRemain] = useState(0)
-  const { isLoading, error } = useUserContext()
-  const { Sort, sortedUsers, setSorted } = useSort()
+  const { users, isLoading, error } = useUserContext()
 
   useFocusEffect(
     useCallback(() => {
-      setTotalRemain(sortedUsers.reduce((sum, item) => sum + item.remain, 0))
-    }, [sortedUsers])
+      setTotalRemain(users.reduce((sum, item) => sum + item.remain, 0))
+    }, [users])
   )
 
   return (
@@ -25,7 +24,6 @@ const QarzdorlarScreen = () => {
         <Text style={styles.headerTitle}>
           {new Intl.NumberFormat('en-US').format(+totalRemain)} so&apos;m
         </Text>
-        <Sort />
       </View>
 
       <View style={styles.borrowersContainer}>
@@ -36,7 +34,7 @@ const QarzdorlarScreen = () => {
             <Error error={error} />
           ) : (
             <FlatList
-              data={sortedUsers}
+              data={users}
               keyExtractor={(item) => item._id.toString()}
               renderItem={({ item }) => <BorrowerItem item={item} />}
               showsVerticalScrollIndicator={false}
