@@ -10,15 +10,11 @@ export const UserContext = createContext({
   LINK_TYPES: Object
 })
 
-export const useUserContext = () => {
-  return useContext(UserContext)
-}
+export const useUserContext = () => useContext(UserContext)
 
 export const UserProvider = ({ children }) => {
   const { users, isLoading, error, fetchUsers, searchUsers, LINK_TYPES } =
     useDebtUsers()
-
-  console.log({ users })
 
   useEffect(() => {
     fetchUsers(LINK_TYPES.ALL_USERS)
