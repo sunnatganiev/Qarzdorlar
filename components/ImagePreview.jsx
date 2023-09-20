@@ -12,14 +12,10 @@ import { Ionicons } from '@expo/vector-icons'
 
 const ImagePreview = ({ visible, imageUrl, onClose }) => {
   const handleShare = async () => {
-    try {
-      await Share.share({
-        message: 'Check out this image:',
-        url: imageUrl
-      })
-    } catch (error) {
-      console.error('Error sharing image:', error.message)
-    }
+    await Share.share({
+      message: 'Check out this image:',
+      url: imageUrl
+    })
   }
 
   return (

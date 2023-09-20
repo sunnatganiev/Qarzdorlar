@@ -41,21 +41,14 @@ export async function uploadImageAsync(uri) {
       return imageUrl
     }
   } catch (error) {
-    console.error('Error uploading image: ', error)
     return null
   }
 }
 
 export async function deleteImageFromStorage(imageUrl) {
-  try {
-    // Create a reference to the image file using the URL
-    const imageRef = ref(getStorage(), imageUrl)
+  // Create a reference to the image file using the URL
+  const imageRef = ref(getStorage(), imageUrl)
 
-    // Delete the image file
-    await deleteObject(imageRef)
-
-    console.log('Image deleted successfully')
-  } catch (error) {
-    console.error('Error deleting image: ', error)
-  }
+  // Delete the image file
+  await deleteObject(imageRef)
 }

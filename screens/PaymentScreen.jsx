@@ -10,15 +10,11 @@ const PaymentScreen = () => {
   const [serviceFee, setServiceFee] = useState(100000)
 
   const fetchServiceFee = async () => {
-    try {
-      const currentServiceFee = await sendAuthenticatedRequest('/payment')
-      if (currentServiceFee.status === 'success') {
-        setServiceFee(currentServiceFee.payment)
-      } else {
-        throw new Error('Error requesting Service Fee')
-      }
-    } catch (error) {
-      console.error(error)
+    const currentServiceFee = await sendAuthenticatedRequest('/payment')
+    if (currentServiceFee.status === 'success') {
+      setServiceFee(currentServiceFee.payment)
+    } else {
+      throw new Error('Error requesting Service Fee')
     }
   }
 
@@ -29,9 +25,7 @@ const PaymentScreen = () => {
   const handlePayment = async () => {
     const deepLink = `https://my.click.uz/clickp2p/7AFC50ED97F7AC54AD41DA6564138BE93CA2A9766225FF966D41DCB8002AFF9C`
 
-    Linking.openURL(deepLink).catch((err) =>
-      console.error('Error opening deep link:', err)
-    )
+    Linking.openURL(deepLink)
   }
 
   return (

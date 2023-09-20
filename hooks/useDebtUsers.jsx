@@ -22,7 +22,6 @@ export const useDebtUsers = () => {
       try {
         let link
         if (url === ALL_USERS) {
-          console.log('All Users fetched')
           link = '?remain[lt]=0'
         } else if (url === ARCHIVE) {
           link = '?remain[eq]=0'

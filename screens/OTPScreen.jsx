@@ -46,12 +46,11 @@ const OTPScreen = ({ route }) => {
             setOTP('')
             storeCurrentUser(JSON.stringify(res.data))
           })
-          .catch((err) => {
+          .catch(() => {
             Alert.alert(
               'SMS Kodni tasdiqlashda xatolik',
               'Iltimos Kodni tekshirib qaytadan kiriting'
             )
-            console.error('error', err.message)
           })
       }
     }, [otp, navigation, phoneNumber])

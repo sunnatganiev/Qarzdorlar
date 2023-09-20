@@ -23,15 +23,11 @@ const RegisterScreen = () => {
 
   useEffect(() => {
     const checkLoginStatus = async () => {
-      try {
-        // await SecureStore.deleteItemAsync('owner')
-        const data = JSON.parse(await SecureStore.getItemAsync('owner'))
+      // await SecureStore.deleteItemAsync('owner')
+      const data = JSON.parse(await SecureStore.getItemAsync('owner'))
 
-        if (data?.token) {
-          navigation.replace('Main')
-        }
-      } catch (error) {
-        console.error('error', error)
+      if (data?.token) {
+        navigation.replace('Main')
       }
     }
 

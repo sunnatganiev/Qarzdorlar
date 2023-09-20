@@ -3,14 +3,9 @@ import * as SecureStore from 'expo-secure-store'
 const BASE_URL = process.env.EXPO_PUBLIC_BACK_END
 
 const getToken = async () => {
-  try {
-    const data = JSON.parse(await SecureStore.getItemAsync('owner'))
+  const data = JSON.parse(await SecureStore.getItemAsync('owner'))
 
-    return data?.token
-  } catch (error) {
-    // Handle error if needed
-    console.error('Error retrieving token:', error)
-  }
+  return data?.token
 }
 
 export const sendAuthenticatedRequest = async (

@@ -21,15 +21,10 @@ const LoginScreen = () => {
 
   useEffect(() => {
     const checkLoginStatus = async () => {
-      try {
-        // await SecureStore.deleteItemAsync('owner')
-        const data = JSON.parse(await SecureStore.getItemAsync('owner'))
+      const data = JSON.parse(await SecureStore.getItemAsync('owner'))
 
-        if (data?.token) {
-          navigation.replace('Main')
-        }
-      } catch (error) {
-        console.error('error', error)
+      if (data?.token) {
+        navigation.replace('Main')
       }
     }
 
@@ -64,7 +59,6 @@ const LoginScreen = () => {
       }
     } catch (error) {
       Alert.alert(`${error}`)
-      console.error('error', { error })
     }
   }
 
