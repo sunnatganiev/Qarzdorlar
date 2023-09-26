@@ -14,6 +14,7 @@ export const sendAuthenticatedRequest = async (
   data
 ) => {
   const token = await getToken()
+
   const headers = {
     'Content-Type': 'application/json'
   }
@@ -22,10 +23,20 @@ export const sendAuthenticatedRequest = async (
     headers.Authorization = `Bearer ${token}`
   }
 
+  let body
+
+  if (data) {
+    if (url === '/upload') {
+      body = data
+    } else {
+      body = JSON.stringify(data)
+    }
+  }
+
   const requestOptions = {
     method,
     headers,
-    ...(data && { body: JSON.stringify(data) })
+    ...(data && { body })
   }
 
   const response = await fetch(`${BASE_URL}${url}`, requestOptions)

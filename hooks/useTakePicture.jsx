@@ -3,8 +3,7 @@ import * as ImagePicker from 'expo-image-picker'
 import { Camera } from 'expo-camera'
 
 import { useCallback, useEffect, useState } from 'react'
-import { deleteImageFromStorage, uploadImageAsync } from '../firebase'
-import { manipulateAsync, SaveFormat } from 'expo-image-manipulator'
+import { sendAuthenticatedRequest } from '../helpers/sendRequest'
 
 const useTakePicture = () => {
   const [isImgLoading, setIsImgLoading] = useState(false)
@@ -52,7 +51,7 @@ const useTakePicture = () => {
 
   const handleTakePicture = async () => {
     if (image) {
-      await deleteImageFromStorage(image)
+      await sendAuthenticatedRequest('/deleteImage', 'POST', { image })
     }
 
     let result = await ImagePicker.launchCameraAsync({
@@ -68,23 +67,24 @@ const useTakePicture = () => {
 
     let url = result.assets[0]?.uri
 
-    if (Platform.OS === 'ios') {
-      const manipResult = await manipulateAsync(
-        result.assets[0]?.uri,
-        [{ resize: { width: 1500, height: 2000 } }],
-        {
-          compress: 0.05,
-          format: SaveFormat.JPEG
-        }
-      )
+    const response = await fetch(url)
 
-      url = manipResult?.uri
+    if (response.ok) {
+      const formData = new FormData()
+      formData.append('image', {
+        name: 'image.jpg',
+        type: 'image/jpg',
+        uri: url
+      })
+
+      const res = await sendAuthenticatedRequest('/upload', 'POST', formData)
+
+      if (res.status === 'success') {
+        setImage(res.data.imageUrl)
+      }
+
+      setIsImgLoading(false)
     }
-
-    const imgUri = await uploadImageAsync(url)
-
-    setImage(imgUri)
-    setIsImgLoading(false)
   }
 
   return { image, setImage, isImgLoading, handleTakePicture }
