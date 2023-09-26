@@ -87,15 +87,11 @@ const BorrowerDetail = ({ route }) => {
     const pay = async () => {
       setIsLoading(true)
 
-      console.log(user)
-
       const transactions = [...user.transactions, { amount: -remain }]
       const body = {
         transactions,
         remain: 0
       }
-
-      console.log(user._id)
 
       const res = await sendAuthenticatedRequest(`/${user._id}`, 'PATCH', body)
 

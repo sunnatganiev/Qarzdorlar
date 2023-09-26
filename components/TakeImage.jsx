@@ -58,13 +58,7 @@ const TakeImage = ({ setImage }) => {
               onPress={() => setModalVisible(true)}
               style={styles.image}
             >
-              <Image
-                source={{ uri: image }}
-                style={{ flex: 1 }}
-                onError={(error) =>
-                  console.error('Image loading error:', error)
-                }
-              />
+              <Image source={{ uri: image }} style={{ flex: 1 }} />
             </TouchableOpacity>
 
             <ImagePreview

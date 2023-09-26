@@ -173,9 +173,6 @@ const TransactionDetail = ({ route }) => {
                 <Image
                   source={{ uri: transaction.imageUrl }}
                   style={{ flex: 1, borderRadius: 8 }}
-                  onError={(error) =>
-                    console.error('Image loading error:', error)
-                  }
                 />
               </TouchableOpacity>
             </View>

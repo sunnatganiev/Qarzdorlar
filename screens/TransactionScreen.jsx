@@ -37,24 +37,20 @@ const TransactionScreen = ({ route }) => {
   const handleEdit = async () => {
     setIsLoading(true)
 
-    try {
-      const body = {
-        name,
-        phoneNumber: phone,
-        address
-      }
-
-      const res = await sendAuthenticatedRequest(`/${user._id}`, 'PATCH', body)
-
-      if (res.status === 'success') {
-        fetchUsers(LINK_TYPES.ALL_USERS)
-        navigation.navigate('BorrowerDetail', { refresh: true, id: user._id })
-      }
-    } catch (error) {
-      console.error(error)
-    } finally {
-      setIsLoading(false)
+    const body = {
+      name,
+      phoneNumber: phone,
+      address
     }
+
+    const res = await sendAuthenticatedRequest(`/${user._id}`, 'PATCH', body)
+
+    if (res.status === 'success') {
+      fetchUsers(LINK_TYPES.ALL_USERS)
+      navigation.navigate('BorrowerDetail', { refresh: true, id: user._id })
+    }
+
+    setIsLoading(false)
   }
 
   const handleUpdateTransaction = async () => {
