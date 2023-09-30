@@ -64,7 +64,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'space-between',
     padding: 20,
-    marginVertical: 20
+    marginVertical: 10
   },
   inputView: {
     alignItems: 'center',

@@ -16,6 +16,8 @@ import { Entypo } from '@expo/vector-icons'
 import { PhoneInput } from 'react-native-international-phone-number'
 import * as SecureStore from 'expo-secure-store'
 
+const PlaceholderImage = require('../assets/logo.png')
+
 const RegisterScreen = () => {
   const [phone, setPhone] = useState('')
   const [name, setName] = useState('')
@@ -23,7 +25,6 @@ const RegisterScreen = () => {
 
   useEffect(() => {
     const checkLoginStatus = async () => {
-      // await SecureStore.deleteItemAsync('owner')
       const data = JSON.parse(await SecureStore.getItemAsync('owner'))
 
       if (data?.token) {
@@ -42,14 +43,18 @@ const RegisterScreen = () => {
     try {
       const user = { name, phoneNumber: `+998${phone.replaceAll(' ', '')}` }
 
-      const res = await fetch(`${process.env.EXPO_PUBLIC_BACK_END}/signup`, {
-        method: 'POST',
-        headers: {
-          Accept: 'application/json',
-          'Content-Type': 'application/json'
-        },
-        body: JSON.stringify(user)
-      })
+      // const res = await fetch(`${process.env.EXPO_PUBLIC_BACK_END}/signup`, {
+      const res = await fetch(
+        'https://qarzdorlar.technify.uz/api/v1/debtshouse/signup',
+        {
+          method: 'POST',
+          headers: {
+            Accept: 'application/json',
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify(user)
+        }
+      )
 
       const data = await res.json()
 
@@ -72,12 +77,15 @@ const RegisterScreen = () => {
         keyboardShouldPersistTaps={'handled'}
         showsVerticalScrollIndicator={false}
       >
-        <View style={{ alignItems: 'center', marginTop: 40 }}>
+        <View
+          style={{
+            alignItems: 'center',
+            marginTop: 40
+          }}
+        >
           <Image
-            style={{ height: 96, width: 112, resizeMode: 'contain' }}
-            source={{
-              uri: 'https://freelogopng.com/images/all_img/1688663386threads-logo-transparent.png'
-            }}
+            style={{ height: 112, width: 200, resizeMode: 'contain' }}
+            source={PlaceholderImage}
           />
         </View>
 

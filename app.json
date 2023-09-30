@@ -1,7 +1,7 @@
 {
   "expo": {
-    "scheme": "qarzdorlar1.0",
-    "name": "qarzdorlar1.0",
+    "scheme": "qarzdorlar",
+    "name": "qarzdorlar",
     "slug": "qarzdorlar",
     "version": "1.0.0",
     "orientation": "portrait",
@@ -21,9 +21,7 @@
       "resizeMode": "contain",
       "backgroundColor": "#ffffff"
     },
-    "assetBundlePatterns": [
-      "**/*"
-    ],
+    "assetBundlePatterns": ["**/*"],
     "ios": {
       "supportsTablet": true
     },
@@ -43,8 +41,9 @@
     },
     "extra": {
       "eas": {
-        "projectId": "f5020de3-b787-43ef-bb39-de00c2c937c4"
+        "projectId": "0c4567d7-2c61-4b5b-9c39-a6f971fe7886"
       }
-    }
+    },
+    "owner": "ganievs"
   }
 }

@@ -7,7 +7,12 @@ import {
 } from 'react-native'
 import React from 'react'
 
-const KeyboardViewWrapper = ({ children, style, ...otherProps }) => {
+const KeyboardViewWrapper = ({
+  children,
+  style,
+  topBgColor,
+  topTextColor = 'light'
+}) => {
   return (
     <SafeAreaView style={{ height: '100%', ...style }}>
       <KeyboardAvoidingView
@@ -16,6 +21,7 @@ const KeyboardViewWrapper = ({ children, style, ...otherProps }) => {
       >
         {children}
       </KeyboardAvoidingView>
+      <StatusBar backgroundColor="#28b485" />
     </SafeAreaView>
   )
 }

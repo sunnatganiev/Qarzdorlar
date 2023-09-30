@@ -15,6 +15,8 @@ import { useNavigation } from '@react-navigation/native'
 import { PhoneInput } from 'react-native-international-phone-number'
 import * as SecureStore from 'expo-secure-store'
 
+const PlaceholderImage = require('../assets/logo.png')
+
 const LoginScreen = () => {
   const [phone, setPhone] = useState('')
   const navigation = useNavigation()
@@ -34,7 +36,8 @@ const LoginScreen = () => {
   const handleLogin = async () => {
     try {
       const response = await fetch(
-        `${process.env.EXPO_PUBLIC_BACK_END}/login`,
+        // `${process.env.EXPO_PUBLIC_BACK_END}/login`,
+        'https://qarzdorlar.technify.uz/api/v1/debtshouse/login',
         {
           method: 'POST',
           headers: {
@@ -75,10 +78,8 @@ const LoginScreen = () => {
           }}
         >
           <Image
-            style={{ height: 96, width: 112, resizeMode: 'contain' }}
-            source={{
-              uri: 'https://freelogopng.com/images/all_img/1688663386threads-logo-transparent.png'
-            }}
+            style={{ height: 112, width: 200, resizeMode: 'contain' }}
+            source={PlaceholderImage}
           />
         </View>
         <View

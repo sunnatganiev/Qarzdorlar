@@ -1,11 +1,11 @@
 import {
   View,
   Text,
-  Pressable,
   TouchableOpacity,
   StyleSheet,
   ScrollView,
-  TextInput
+  TextInput,
+  Alert
 } from 'react-native'
 
 import React, { useState } from 'react'
@@ -35,6 +35,10 @@ const TransactionScreen = ({ route }) => {
   const navigation = useNavigation()
 
   const handleEdit = async () => {
+    if (phone.length > 0 && phone.length < 11) {
+      return Alert.alert("Telefon raqamni to'liq kirgizing")
+    }
+
     setIsLoading(true)
 
     const body = {

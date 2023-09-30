@@ -65,26 +65,33 @@ const useTakePicture = () => {
       return setImage(null)
     }
 
-    let url = result.assets[0]?.uri
+    let uri = result.assets[0]?.uri
 
-    const response = await fetch(url)
+    const formData = new FormData()
 
-    if (response.ok) {
-      const formData = new FormData()
-      formData.append('image', {
-        name: 'image.jpg',
-        type: 'image/jpg',
-        uri: url
-      })
+    let type, name
 
-      const res = await sendAuthenticatedRequest('/upload', 'POST', formData)
-
-      if (res.status === 'success') {
-        setImage(res.data.imageUrl)
-      }
-
-      setIsImgLoading(false)
+    if (uri.endsWith('.jpg')) {
+      type = 'image/jpg'
+      name = 'image.jpg'
+    } else if (uri.endsWith('.jpeg')) {
+      type = 'image/jpeg'
+      name = 'image.jpeg'
     }
+
+    formData.append('image', {
+      name,
+      type,
+      uri
+    })
+
+    const res = await sendAuthenticatedRequest('/upload', 'POST', formData)
+
+    if (res.status === 'success') {
+      setImage(res.data.imageUrl)
+    }
+
+    setIsImgLoading(false)
   }
 
   return { image, setImage, isImgLoading, handleTakePicture }

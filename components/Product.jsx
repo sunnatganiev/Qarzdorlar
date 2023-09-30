@@ -7,7 +7,7 @@ import {
   Alert,
   TouchableOpacity
 } from 'react-native'
-import React, { useEffect, useRef, useState } from 'react'
+import React, { useRef, useState } from 'react'
 import { Entypo } from '@expo/vector-icons'
 import { Feather } from '@expo/vector-icons'
 import NumberInput from './NumberInput'
@@ -15,11 +15,9 @@ import NumberInput from './NumberInput'
 const Product = ({ product: initialProduct, setProducts, removeProduct }) => {
   const [isExpanded, setIsExpanded] = useState(false)
   const [product, setProduct] = useState(initialProduct)
-  const [totalPrice, setTotalPrice] = useState(0)
   const [quantity, setQuantity] = useState(1)
   const [price, setPrice] = useState('')
   const nameRef = useRef()
-  const priceRef = useRef()
 
   const handleRemoveProduct = () => {
     Alert.alert("Maxsulotni o'chirmoqchimisiz?", '', [
@@ -37,19 +35,13 @@ const Product = ({ product: initialProduct, setProducts, removeProduct }) => {
     ])
   }
 
-  useEffect(() => {
-    if (price >= 1) {
-      if (quantity === 1 || !Number(quantity)) {
-        setTotalPrice(price)
-        return
-      } else {
-        setTotalPrice(() => {
-          const total = +price * +quantity
-          return total
-        })
-      }
-    }
-  }, [price, quantity])
+  let totalPrice = 0
+
+  if (quantity === 1 || !Number(quantity)) {
+    totalPrice = price
+  } else {
+    totalPrice = +price * +quantity
+  }
 
   const toggleAccordion = () => {
     setIsExpanded(!isExpanded)
@@ -141,7 +133,6 @@ const Product = ({ product: initialProduct, setProducts, removeProduct }) => {
                 keyboardType="numeric"
                 onChange={(text) => setPrice(text || 1)}
                 changedValue={price}
-                ref={priceRef}
               />
             </View>
 

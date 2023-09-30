@@ -2,7 +2,6 @@ import { View, Text, StyleSheet, Pressable } from 'react-native'
 
 import React from 'react'
 import { MaterialCommunityIcons } from '@expo/vector-icons'
-import formatNum from '../helpers/numberFormat'
 import moment from 'moment'
 import { useNavigation } from '@react-navigation/native'
 
@@ -68,7 +67,7 @@ const HistoryItem = ({ transaction: { time, amount }, transaction, user }) => {
             fontSize: 16
           }}
         >
-          {formatNum(amount)} so'm
+          {new Intl.NumberFormat('en-US').format(amount)} so&apos;m
         </Text>
       </View>
     </Pressable>

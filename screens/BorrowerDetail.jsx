@@ -29,14 +29,13 @@ import Spinner from '../components/Spinner'
 
 const BorrowerDetail = ({ route }) => {
   const [user, setUser] = useState(null)
-  const [remain, setRemain] = useState(0)
   const [isLoading, setIsLoading] = useState(false)
-  const [daysLeft, setDaysLeft] = useState('')
-  const [badgeColor, setBadgeColor] = useState('#28b485')
   const [userId] = useState(route.params.id)
   const isFocused = useIsFocused()
   const { fetchUsers } = useUserContext()
   const { LINK_TYPES } = useDebtUsers()
+  let daysLeft
+  let badgeColor = '#28b485'
 
   const navigator = useNavigation()
 
@@ -51,7 +50,6 @@ const BorrowerDetail = ({ route }) => {
 
         const newUser = res.data.oneUser
         setUser(newUser)
-        setRemain(newUser.remain)
       }
 
       fetchUser()
@@ -62,15 +60,16 @@ const BorrowerDetail = ({ route }) => {
     // LEC 12) add locale
     const calcDaysPassed = (date1, date2) =>
       Math.round((date1 - date2) / (60 * 60 * 24 * 1000))
+
     const now = new Date()
     const dayLeft = calcDaysPassed(new Date(date), now)
 
     if (dayLeft >= 1 && dayLeft <= 3) {
-      setBadgeColor('#ff7730')
+      badgeColor = '#ff7730'
     } else if (dayLeft <= 0) {
-      setBadgeColor('#f73d09')
+      badgeColor = '#f73d09'
     } else {
-      setBadgeColor('#28b485')
+      badgeColor = '#28b485'
     }
 
     if (dayLeft === 0) return 'Bugun'
@@ -79,15 +78,15 @@ const BorrowerDetail = ({ route }) => {
     if (dayLeft < 0) return `${dayLeft} kun o'tib ketdi`
   }
 
-  useEffect(() => {
-    setDaysLeft(formatMovementDate(user?.reminder))
-  }, [user])
+  if (user?.remain !== 0) {
+    daysLeft = formatMovementDate(user?.reminder)
+  }
 
   const handlePayAll = async () => {
     const pay = async () => {
       setIsLoading(true)
 
-      const transactions = [...user.transactions, { amount: -remain }]
+      const transactions = [...user.transactions, { amount: -user.remain }]
       const body = {
         transactions,
         remain: 0
@@ -150,21 +149,25 @@ const BorrowerDetail = ({ route }) => {
               <ActivityIndicator />
             ) : (
               <>
-                <View
-                  style={{
-                    position: 'absolute',
-                    backgroundColor: `${badgeColor}`,
-                    paddingHorizontal: 10,
-                    paddingVertical: 1,
-                    width: 'auto',
-                    borderBottomRightRadius: 10
-                  }}
-                >
-                  <Text style={styles.badgeText}>{daysLeft}</Text>
-                </View>
+                {user.remain !== 0 && (
+                  <View
+                    style={{
+                      position: 'absolute',
+                      backgroundColor: `${badgeColor}`,
+                      paddingHorizontal: 10,
+                      paddingVertical: 1,
+                      width: 'auto',
+                      borderBottomRightRadius: 10
+                    }}
+                  >
+                    <Text style={styles.badgeText}>{daysLeft}</Text>
+                  </View>
+                )}
+
                 <View style={{ marginBottom: 20 }}>
                   <Text style={{ fontSize: 30, fontWeight: 'bold' }}>
-                    {new Intl.NumberFormat('en-US').format(remain)} SO&apos;M
+                    {new Intl.NumberFormat('en-US').format(user.remain)}{' '}
+                    SO&apos;M
                   </Text>
                 </View>
                 <View

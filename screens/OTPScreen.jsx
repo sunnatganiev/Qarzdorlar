@@ -1,5 +1,5 @@
 import React, { useCallback, useState } from 'react'
-import { View, Text, StyleSheet, Alert, Platform } from 'react-native'
+import { View, Text, StyleSheet, Alert, Platform, Image } from 'react-native'
 import OTPInputView from '@twotalltotems/react-native-otp-input'
 import { FontAwesome5 } from '@expo/vector-icons'
 import { SafeAreaView } from 'react-native-safe-area-context'
@@ -7,6 +7,8 @@ import * as SecureStore from 'expo-secure-store'
 import OTPInput from 'react-native-otp-withpaste'
 import axios from 'axios'
 import { useFocusEffect, useNavigation } from '@react-navigation/native'
+
+const PlaceholderImage = require('../assets/logo.png')
 
 const OTPScreen = ({ route }) => {
   const [otp, setOTP] = useState('')
@@ -38,7 +40,8 @@ const OTPScreen = ({ route }) => {
       if (otp.length === 6) {
         // Send code to back-end
         axios
-          .post(`${process.env.EXPO_PUBLIC_BACK_END}/verify-otp`, {
+          // .post(`${process.env.EXPO_PUBLIC_BACK_END}/verify-otp`, {
+          .post('https://qarzdorlar.technify.uz/api/v1/debtshouse/verify-otp', {
             phoneNumber,
             otp
           })
@@ -66,7 +69,11 @@ const OTPScreen = ({ route }) => {
         }}
       >
         <View style={{ alignItems: 'center' }}>
-          <FontAwesome5 name="envelope-open-text" size={100} color="black" />
+          <Image
+            style={{ height: 112, width: 200, resizeMode: 'contain' }}
+            source={PlaceholderImage}
+          />
+
           <Text style={styles.title}>KODNI KIRGIZING</Text>
         </View>
         {Platform.OS === 'ios' && (
