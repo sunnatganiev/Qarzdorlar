@@ -1,8 +1,25 @@
 // import React from 'react'
 // import { View, Text, Button } from 'react-native'
+import { useNavigation } from '@react-navigation/native'
 import * as Notifications from 'expo-notifications'
+import { useEffect } from 'react'
+import { Alert } from 'react-native'
 
 export default function useNotification() {
+  const navigation = useNavigation()
+  useEffect(() => {
+    const subs1 = Notifications.addNotificationResponseReceivedListener(
+      (response) => {
+        const screen = response.notification.request.content.data.screen
+        navigation.replace(screen)
+      }
+    )
+
+    return () => {
+      subs1.remove()
+    }
+  }, [navigation])
+
   const handleScheduleNotification = async (date) => {
     const targetDate = date.getTime() // Replace with your target date and time
     const currentTime = new Date()
@@ -19,21 +36,19 @@ export default function useNotification() {
     const { status } = await Notifications.requestPermissionsAsync()
 
     if (status !== 'granted') {
-      alert('Notification permission denied')
+      Alert.alert('Notification permission denied')
       return
     }
 
     // Schedule the notification
     await Notifications.scheduleNotificationAsync({
       content: {
-        title: '10 seconds left',
-        body: 'Here is the notification body',
-        data: { data: 'goes here' }
+        title: 'Kechikgan Qarzdorlar',
+        body: 'Qarzdorlaringizni ogohlantiring',
+        data: { screen: 'Delayed' }
       },
       trigger: { seconds: timeDifferenceInSeconds }
     })
-
-    //   alert('Notification scheduled successfully!')
   }
 
   Notifications.setNotificationHandler({

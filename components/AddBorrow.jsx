@@ -129,6 +129,8 @@ const AddBorrow = ({ setIsLoading, newBorrower, addBorrow }) => {
 
     const res = await sendAuthenticatedRequest('', 'POST', reqBody)
 
+    console.log({ res })
+
     if (res.status === 'success') {
       handleScheduleNotification(date)
       newBorrower?.setName('')
@@ -190,6 +192,8 @@ const AddBorrow = ({ setIsLoading, newBorrower, addBorrow }) => {
       'PATCH',
       body
     )
+
+    console.log({ res })
 
     if (res.status === 'success') {
       setTotalPriceOfProduct('')
