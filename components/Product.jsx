@@ -38,7 +38,7 @@ const Product = ({ product: initialProduct, setProducts, removeProduct }) => {
   let totalPrice = 0
 
   if (quantity === 1 || !Number(quantity)) {
-    totalPrice = price
+    totalPrice = +price
   } else {
     totalPrice = +price * +quantity
   }
@@ -85,7 +85,6 @@ const Product = ({ product: initialProduct, setProducts, removeProduct }) => {
             style={{
               flexDirection: 'row',
               alignItems: 'center',
-              flex: 1,
               justifyContent: 'flex-end'
             }}
           >
@@ -93,7 +92,7 @@ const Product = ({ product: initialProduct, setProducts, removeProduct }) => {
               style={{
                 fontWeight: 'bold',
                 fontSize: 16,
-                marginRight: 10,
+                marginRight: 0,
                 color: '#28b485'
               }}
             >
@@ -195,11 +194,14 @@ const styles = StyleSheet.create({
     borderStyle: 'solid',
     borderColor: '#d0d0d0',
     padding: 10,
-    borderRadius: 8
+    borderRadius: 8,
+    display: 'flex',
+    flexWrap: 'wrap'
   },
   accordionTitle: {
     fontSize: 20,
-    width: '40%'
+    flex: 1
+    // width: '40%'
   },
   label: {
     fontSize: 16,

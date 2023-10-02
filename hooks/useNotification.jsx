@@ -7,6 +7,7 @@ import { Alert } from 'react-native'
 
 export default function useNotification() {
   const navigation = useNavigation()
+
   useEffect(() => {
     const subs1 = Notifications.addNotificationResponseReceivedListener(
       (response) => {

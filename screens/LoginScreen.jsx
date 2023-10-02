@@ -36,8 +36,8 @@ const LoginScreen = () => {
   const handleLogin = async () => {
     try {
       const response = await fetch(
-        // `${process.env.EXPO_PUBLIC_BACK_END}/login`,
-        'https://qarzdorlar.technify.uz/api/v1/debtshouse/login',
+        `${process.env.EXPO_PUBLIC_BACK_END}/login`,
+        // 'https://qarzdorlar.technify.uz/api/v1/debtshouse/login',
         {
           method: 'POST',
           headers: {

@@ -1,7 +1,7 @@
 import * as SecureStore from 'expo-secure-store'
 
-// const BASE_URL = process.env.EXPO_PUBLIC_BACK_END
-const BASE_URL = 'https://qarzdorlar.technify.uz/api/v1/debtshouse'
+const BASE_URL = process.env.EXPO_PUBLIC_BACK_END
+// const BASE_URL = 'https://qarzdorlar.technify.uz/api/v1/debtshouse'
 
 const getToken = async () => {
   const data = JSON.parse(await SecureStore.getItemAsync('owner'))
@@ -33,7 +33,7 @@ export const sendAuthenticatedRequest = async (
       headers['Content-Type'] = 'application/json'
     }
   }
-  console.log({ headers })
+
   const requestOptions = {
     method,
     headers,

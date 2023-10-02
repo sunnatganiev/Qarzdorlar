@@ -40,8 +40,8 @@ const OTPScreen = ({ route }) => {
       if (otp.length === 6) {
         // Send code to back-end
         axios
-          // .post(`${process.env.EXPO_PUBLIC_BACK_END}/verify-otp`, {
-          .post('https://qarzdorlar.technify.uz/api/v1/debtshouse/verify-otp', {
+          .post(`${process.env.EXPO_PUBLIC_BACK_END}/verify-otp`, {
+            // .post('https://qarzdorlar.technify.uz/api/v1/debtshouse/verify-otp', {
             phoneNumber,
             otp
           })

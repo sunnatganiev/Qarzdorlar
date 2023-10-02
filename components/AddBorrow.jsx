@@ -6,7 +6,7 @@ import {
   Alert,
   StyleSheet
 } from 'react-native'
-import React, { useEffect, useState } from 'react'
+import React, { useState } from 'react'
 import Product from './Product'
 import NumberInput from './NumberInput'
 import { CheckBox } from 'react-native-elements'
@@ -29,7 +29,6 @@ const initialProduct = {
 
 const AddBorrow = ({ setIsLoading, newBorrower, addBorrow }) => {
   const [products, setProducts] = useState([])
-  const [qoldiq, setQoldiq] = useState(0)
   const [paymentAmount, setPaymentAmount] = useState(0)
   const [totalPriceOfProduct, setTotalPriceOfProduct] = useState(0)
   const [image, setImage] = useState('')
@@ -38,21 +37,24 @@ const AddBorrow = ({ setIsLoading, newBorrower, addBorrow }) => {
 
   const [date, setDate] = useState(currentDate)
   const [isChecked, setIsChecked] = useState(false)
-  const [fee, setFee] = useState(0)
   const { handleScheduleNotification } = useNotification()
   const navigator = useNavigation()
   const { fetchUsers } = useUserContext()
 
   const { LINK_TYPES } = useDebtUsers()
 
-  const handleCheckboxToggle = () => {
-    const lend = totalPriceOfProduct - paymentAmount
-    if (!isChecked) {
-      setQoldiq(fee + lend)
-    } else {
-      setQoldiq(lend)
+  function handleTotalChange(num) {
+    if (paymentAmount > +num) {
+      setPaymentAmount(+num)
     }
-    setIsChecked(!isChecked)
+    setTotalPriceOfProduct(+num)
+  }
+
+  let lend = totalPriceOfProduct - paymentAmount
+  let fee = lend * 0.005
+
+  if (isChecked) {
+    lend += fee
   }
 
   const removeProductHandler = (id, total) => {
@@ -65,17 +67,6 @@ const AddBorrow = ({ setIsLoading, newBorrower, addBorrow }) => {
     const res = [...products, { ...initialProduct, id: uuid.v4() }]
     setProducts(res)
   }
-
-  useEffect(() => {
-    const lend = totalPriceOfProduct - paymentAmount
-    const newFee = lend * 0.005
-    setFee(newFee)
-    if (isChecked) {
-      setQoldiq(newFee + lend)
-    } else {
-      setQoldiq(lend)
-    }
-  }, [totalPriceOfProduct, paymentAmount, isChecked])
 
   const handleAddBorrower = async () => {
     // Validation logic
@@ -124,12 +115,10 @@ const AddBorrow = ({ setIsLoading, newBorrower, addBorrow }) => {
       phoneNumber: newBorrower?.phone,
       reminder: date,
       transactions,
-      remain: -qoldiq
+      remain: -lend
     }
 
     const res = await sendAuthenticatedRequest('', 'POST', reqBody)
-
-    console.log({ res })
 
     if (res.status === 'success') {
       handleScheduleNotification(date)
@@ -138,7 +127,6 @@ const AddBorrow = ({ setIsLoading, newBorrower, addBorrow }) => {
       newBorrower?.setAddress('')
       setTotalPriceOfProduct('')
       setPaymentAmount('')
-      setQoldiq(0)
       setProducts([])
       setDate(new Date())
       setImage('')
@@ -163,9 +151,6 @@ const AddBorrow = ({ setIsLoading, newBorrower, addBorrow }) => {
   }
 
   const handleUpdateTransaction = async () => {
-    if (qoldiq < 0) {
-      return Alert.alert()
-    }
     setIsLoading(true)
 
     const transactions = [...addBorrow.user.transactions]
@@ -183,7 +168,7 @@ const AddBorrow = ({ setIsLoading, newBorrower, addBorrow }) => {
 
     const body = {
       transactions,
-      remain: addBorrow.user.remain - qoldiq,
+      remain: addBorrow.user.remain - lend,
       reminder: date
     }
 
@@ -198,7 +183,6 @@ const AddBorrow = ({ setIsLoading, newBorrower, addBorrow }) => {
     if (res.status === 'success') {
       setTotalPriceOfProduct('')
       setPaymentAmount('')
-      setQoldiq('')
       setProducts([])
       setIsLoading(false)
       await fetchUsers(LINK_TYPES.ALL_USERS)
@@ -264,7 +248,7 @@ const AddBorrow = ({ setIsLoading, newBorrower, addBorrow }) => {
               placeholder="0"
               style={styles.input}
               keyboardType="numeric"
-              onChange={setTotalPriceOfProduct}
+              onChange={handleTotalChange}
               changedValue={totalPriceOfProduct}
             />
           )}
@@ -297,7 +281,7 @@ const AddBorrow = ({ setIsLoading, newBorrower, addBorrow }) => {
       <View style={styles.float}>
         <Text style={styles.label}>Qarz: </Text>
         <Text style={styles.label}>
-          {new Intl.NumberFormat('en-US').format(qoldiq)}
+          {new Intl.NumberFormat('en-US').format(lend)}
         </Text>
       </View>
 
@@ -306,7 +290,7 @@ const AddBorrow = ({ setIsLoading, newBorrower, addBorrow }) => {
         <CheckBox
           title="Dastur haqqini qo'shish"
           checked={isChecked}
-          onPress={handleCheckboxToggle}
+          onPress={() => setIsChecked((prev) => !prev)}
         />
       </View>
 

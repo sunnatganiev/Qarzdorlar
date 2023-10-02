@@ -43,18 +43,17 @@ const RegisterScreen = () => {
     try {
       const user = { name, phoneNumber: `+998${phone.replaceAll(' ', '')}` }
 
-      // const res = await fetch(`${process.env.EXPO_PUBLIC_BACK_END}/signup`, {
-      const res = await fetch(
-        'https://qarzdorlar.technify.uz/api/v1/debtshouse/signup',
-        {
-          method: 'POST',
-          headers: {
-            Accept: 'application/json',
-            'Content-Type': 'application/json'
-          },
-          body: JSON.stringify(user)
-        }
-      )
+      const res = await fetch(`${process.env.EXPO_PUBLIC_BACK_END}/signup`, {
+        // const res = await fetch(
+        //   'https://qarzdorlar.technify.uz/api/v1/debtshouse/signup',
+        //   {
+        method: 'POST',
+        headers: {
+          Accept: 'application/json',
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify(user)
+      })
 
       const data = await res.json()
 
